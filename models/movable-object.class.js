@@ -22,6 +22,13 @@ class MovableObject {
     });
   }
 
+  playAnimation(images) {
+    let i = this.currentImageIndex % this.IMAGES_WALKING.length; // 0, 1, 2, 3, 4, 5 (Modulo-Operator)
+    let path = images[i];
+    this.img = this.imageCache[path];
+    this.currentImageIndex++;
+  }
+
   moveRight(pixels) {
     console.log("Moving right");
   }

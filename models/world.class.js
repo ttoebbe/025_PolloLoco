@@ -11,6 +11,7 @@ class World {
   canvas;
   ctx;
   keyboard;
+  camera_x = 0;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -26,10 +27,15 @@ class World {
 
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.translate(this.camera_x, 0);
+
     this.addObjectsToMap(this.backgroundObjects);
     this.addToMap(this.character);
     this.addObjectsToMap(this.enemies);
     this.addObjectsToMap(this.clouds);
+
+    this.ctx.translate(-this.camera_x, 0);
 
     requestAnimationFrame(() => this.draw());
   }
@@ -43,9 +49,7 @@ class World {
   addToMap(movableObject) {
     if (movableObject.otherDirection) {
       this.ctx.save();
-      this.ctx.translate(
-        movableObject.width, 0
-      );
+      this.ctx.translate(movableObject.width, 0);
       this.ctx.scale(-1, 1);
       movableObject.x = movableObject.x * -1;
     }

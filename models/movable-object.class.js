@@ -46,15 +46,16 @@ class MovableObject {
 
   moveRight(pixels) {
     this.x += this.speed;
-    this.otherDirection = false;
+    // this.otherDirection = false;
   }
 
   moveLeft() {
     this.x -= this.speed;
-    this.otherDirection = true;
+    // this.otherDirection = true;
   }
 
   jump() {
     this.speedY = 10;
+    this.world.keyboard.SPACE = false; // Reset after jump
   }
 }

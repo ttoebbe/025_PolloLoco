@@ -45,8 +45,16 @@ class MovableObject {
   }
 
   moveRight(pixels) {
-    console.log("Moving right");
+    this.x += this.speed;
+    this.otherDirection = false;
   }
 
-  moveLeft() {}
+  moveLeft() {
+    this.x -= this.speed;
+    this.otherDirection = true;
+  }
+
+  jump() {
+    this.speedY = 10;
+  }
 }

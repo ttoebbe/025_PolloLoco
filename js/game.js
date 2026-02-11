@@ -23,6 +23,8 @@ window.addEventListener("keydown", (e) => {
     keyboard.DOWN = true;
   }
   if (e.key === " ") {
+    e.preventDefault();
+    console.log("SPACE pressed!");
     keyboard.SPACE = true;
   }
 });
@@ -40,7 +42,5 @@ window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowDown") {
     keyboard.DOWN = false;
   }
-  if (e.key === " ") {
-    keyboard.SPACE = false;
-  }
-}); 
+  // SPACE wird nicht auf false gesetzt - bleibt aktiv
+});

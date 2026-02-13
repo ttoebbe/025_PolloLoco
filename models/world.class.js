@@ -41,41 +41,26 @@ class World {
 
   addToMap(movableObject) {
     if (movableObject.otherDirection) {
-      this.ctx.save();
-      this.ctx.translate(movableObject.width, 0);
-      this.ctx.scale(-1, 1);
-      movableObject.x = movableObject.x * -1;
+      this.flipImage(movableObject);
     }
     //Container für Kollisionserkennung
-    this.ctx.drawImage(
-      movableObject.img,
-      movableObject.x,
-      movableObject.y,
-      movableObject.width,
-      movableObject.height,
-    );
-    this.ctx.beginPath();
-    this.ctx.lineWidth = "5";
-    this.ctx.strokeStyle = "blue";
-    this.ctx.rect(
-      movableObject.x,
-      movableObject.y,
-      movableObject.width,
-      movableObject.height,
-    );
-    this.ctx.stroke();
-
-    this.ctx.drawImage(
-      movableObject.img,
-      movableObject.x,
-      movableObject.y,
-      movableObject.width,
-      movableObject.height,
-    );
+    movableObject.draw(this.ctx);
+    movableObject.drawFrame(this.ctx); // Kollisionserkennung sichtbar machen
 
     if (movableObject.otherDirection) {
-      movableObject.x = movableObject.x * -1;
-      this.ctx.restore();
+      this.flipImageBack(movableObject);
     }
+  }
+
+  flipImage(movableObject) {
+    this.ctx.save();
+    this.ctx.translate(movableObject.x + movableObject.width / 2, 0);
+    this.ctx.scale(-1, 1);
+    movableObject.x = movableObject.x * -1;
+  }
+
+  flipImageBack(movableObject) {
+    movableObject.x = movableObject.x * -1;
+    this.ctx.restore();
   }
 }

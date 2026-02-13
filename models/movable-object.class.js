@@ -34,15 +34,22 @@ class MovableObject {
   }
 
   drawFrame(ctx) {
-
-    if(this instanceof Character || this instanceof Chicken)
-    {
-    ctx.beginPath();
-    ctx.lineWidth = "5";
-    ctx.strokeStyle = "blue";
-    ctx.rect(this.x, this.y, this.width, this.height);
-    ctx.stroke();
+    if (this instanceof Character || this instanceof Chicken) {
+      ctx.beginPath();
+      ctx.lineWidth = "5";
+      ctx.strokeStyle = "blue";
+      ctx.rect(this.x, this.y, this.width, this.height);
+      ctx.stroke();
     }
+  }
+
+  isColliding(movableObject) {
+    return (
+      this.x + this.width > movableObject.x &&
+      this.y + this.height > movableObject.y &&
+      this.x < movableObject.x + movableObject.width &&
+      this.y < movableObject.y + movableObject.height
+    );
   }
 
   loadImages(arr) {

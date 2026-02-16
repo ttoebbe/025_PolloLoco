@@ -53,6 +53,18 @@ class MovableObject {
     );
   }
 
+  hit() {
+    this.energy -= 5;
+    if (this.energy < 0) {
+      this.energy = 0;
+      console.log("Character is dead!");
+    }
+  }
+
+  isDead() {
+    return this.energy == 0;
+  }
+
   loadImages(arr) {
     arr.forEach((path) => {
       let img = new Image();

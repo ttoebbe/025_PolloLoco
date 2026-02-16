@@ -75,7 +75,7 @@ class World {
 
   flipImage(movableObject) {
     this.ctx.save();
-    this.ctx.translate(movableObject.x + movableObject.width / 2, 0);
+    this.ctx.translate(movableObject.width, 0);
     this.ctx.scale(-1, 1);
     movableObject.x = movableObject.x * -1;
   }

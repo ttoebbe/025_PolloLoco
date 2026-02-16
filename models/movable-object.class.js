@@ -1,5 +1,5 @@
 class MovableObject extends DrawableObject {
-  speed = 0.15;
+  speed = 0.1;
   otherDirection = false;
   speedY = 0;
   acceleration = 0.5;
@@ -79,7 +79,7 @@ class MovableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 10;
+    this.speedY = 8;
     this.world.keyboard.SPACE = false; // Reset after jump
   }
 }

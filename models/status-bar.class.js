@@ -14,7 +14,12 @@ class StatusBar extends DrawableObject {
   constructor() {
     super(); // Ruft den Konstruktor der übergeordneten Klasse (DrawableObject) auf
     this.loadImages(this.IMAGES); // Lädt die Bilder in den imageCache
-  }
+    this.x = 30;
+    this.y = 0;
+    this.width = 200;
+    this.height = 50;
+    this.setPercentage(100); // Setzt den Anfangsprozentsatz auf 100%
+}
 
   setPercentage(percentage) {
     this.percentage = percentage; // Aktualisiert den Prozentsatz

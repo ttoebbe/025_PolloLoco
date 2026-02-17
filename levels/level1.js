@@ -1,3 +1,18 @@
+const level1Coins = [
+  new Coin(300, 260),
+  new Coin(460, 220),
+  new Coin(620, 260),
+  new Coin(780, 180),
+  new Coin(940, 260),
+  new Coin(1100, 220),
+  new Coin(1260, 260),
+  new Coin(1420, 180),
+  new Coin(1580, 260),
+  new Coin(1740, 220),
+  new Coin(1900, 260),
+  new Coin(2060, 180),
+];
+
 const level1 = new Level(
   [new Chicken(), new Chicken(), new Chicken(), new Endboss()],
   [new Cloud()],
@@ -45,4 +60,5 @@ const level1 = new Level(
       719 * 3,
     ),
   ],
+  level1Coins,
 );

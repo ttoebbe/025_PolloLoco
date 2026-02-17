@@ -18,6 +18,7 @@ pnpm-debug.log*
 .DS_Store
 .github/
 Thumbs.db
+AGENTS.md
 
 # Env and secrets
 .env*

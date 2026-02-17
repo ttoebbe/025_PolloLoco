@@ -6,12 +6,17 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBar();
+  coinBar = new CoinStatusBar();
   throwableObjects = [];
+  collectedCoins = 0;
+  totalCoins = 0;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
+    this.totalCoins = this.level.coins.length;
+    this.updateCoinBar();
     this.draw();
     this.setWorld();
     this.run();
@@ -29,44 +34,55 @@ class World {
   }
 
   checkThrowableObject() {
-    if (this.keyboard.D) {
-      let bottle = new ThrowableObject(this.character.x + 100 , this.character.y + 100);
-      this.throwableObjects.push(bottle);
-      this.keyboard.D = false; // Verhindert Mehrfachwürfe
-    }
+    if (!this.keyboard.D) return;
+    let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+    this.throwableObjects.push(bottle);
+    this.keyboard.D = false;
   }
 
   checkCollisions() {
-    setInterval(() => {
-      this.level.enemies.forEach((enemy) => {
-        if (this.character.isColliding(enemy)) {
-          this.character.hit();
-          this.statusBar.setPercentage(this.character.energy);
-        }
-      });
-    }, 100);
+    this.checkEnemyCollisions();
+    this.checkCoinCollisions();
+  }
+
+  checkEnemyCollisions() {
+    this.level.enemies.forEach((enemy) => {
+      if (!this.character.isColliding(enemy)) return;
+      this.character.hit();
+      this.statusBar.setPercentage(this.character.energy);
+    });
+  }
+
+  checkCoinCollisions() {
+    for (let i = this.level.coins.length - 1; i >= 0; i--) {
+      if (!this.character.isColliding(this.level.coins[i])) continue;
+      this.level.coins.splice(i, 1);
+      this.collectedCoins++;
+      this.updateCoinBar();
+    }
+  }
+
+  updateCoinBar() {
+    if (this.totalCoins === 0) {
+      this.coinBar.setPercentage(0);
+      return;
+    }
+    let percentage = (this.collectedCoins / this.totalCoins) * 100;
+    this.coinBar.setPercentage(percentage);
   }
 
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
-
-    this.ctx.translate(-this.camera_x, 0); // Zurücksetzen der Kamera-Position für die Statusleiste
-    // ---------------------Space for fixed objects like status bar---------------------
-    this.addToMap(this.statusBar);
-
-    //---------------------- End Space for fixed objects like status bar----------------------
-    this.ctx.translate(this.camera_x, 0); // Kamera-Position wiederherstellen für die Spielfiguren
-
+    this.addObjectsToMap(this.level.clouds);
+    this.addObjectsToMap(this.level.coins);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.enemies);
-    this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.throwableObjects);
-
     this.ctx.translate(-this.camera_x, 0);
-
+    this.addToMap(this.statusBar);
+    this.addToMap(this.coinBar);
     requestAnimationFrame(() => this.draw());
   }
 
@@ -80,10 +96,8 @@ class World {
     if (movableObject.otherDirection) {
       this.flipImage(movableObject);
     }
-    //Container für Kollisionserkennung
     movableObject.draw(this.ctx);
-    movableObject.drawFrame(this.ctx); // Kollisionserkennung sichtbar machen
-
+    movableObject.drawFrame(this.ctx);
     if (movableObject.otherDirection) {
       this.flipImageBack(movableObject);
     }

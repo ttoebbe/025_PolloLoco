@@ -6,7 +6,7 @@ class World {
   keyboard;
   camera_x = 0;
   statusBar = new StatusBar();
-  throwableObjects = [new ThrowableObject()];
+  throwableObjects = [];
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -30,7 +30,7 @@ class World {
 
   checkThrowableObject() {
     if (this.keyboard.D) {
-      let bottle = new ThrowableObject(this.character.x, this.character.y);
+      let bottle = new ThrowableObject(this.character.x + 100 , this.character.y + 100);
       this.throwableObjects.push(bottle);
       this.keyboard.D = false; // Verhindert Mehrfachwürfe
     }

@@ -7,16 +7,21 @@ class World {
   camera_x = 0;
   statusBar = new StatusBar();
   coinBar = new CoinStatusBar();
+  bottleBar = new BottleStatusBar();
   throwableObjects = [];
   collectedCoins = 0;
+  collectedBottles = 0;
   totalCoins = 0;
+  maxBottles = 0;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
     this.totalCoins = this.level.coins.length;
+    this.maxBottles = this.level.bottles.length;
     this.updateCoinBar();
+    this.updateBottleBar();
     this.draw();
     this.setWorld();
     this.run();
@@ -35,14 +40,21 @@ class World {
 
   checkThrowableObject() {
     if (!this.keyboard.D) return;
+    if (this.collectedBottles <= 0) {
+      this.keyboard.D = false;
+      return;
+    }
     let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
     this.throwableObjects.push(bottle);
+    this.collectedBottles = Math.max(0, this.collectedBottles - 1);
+    this.updateBottleBar();
     this.keyboard.D = false;
   }
 
   checkCollisions() {
     this.checkEnemyCollisions();
     this.checkCoinCollisions();
+    this.checkBottleCollisions();
   }
 
   checkEnemyCollisions() {
@@ -62,6 +74,15 @@ class World {
     }
   }
 
+  checkBottleCollisions() {
+    for (let i = this.level.bottles.length - 1; i >= 0; i--) {
+      if (!this.character.isColliding(this.level.bottles[i])) continue;
+      this.level.bottles.splice(i, 1);
+      this.collectedBottles++;
+      this.updateBottleBar();
+    }
+  }
+
   updateCoinBar() {
     if (this.totalCoins === 0) {
       this.coinBar.setPercentage(0);
@@ -71,18 +92,29 @@ class World {
     this.coinBar.setPercentage(percentage);
   }
 
+  updateBottleBar() {
+    if (this.maxBottles === 0) {
+      this.bottleBar.setPercentage(0);
+      return;
+    }
+    let percentage = (this.collectedBottles / this.maxBottles) * 100;
+    this.bottleBar.setPercentage(percentage);
+  }
+
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToMap(this.level.backgroundObjects);
     this.addObjectsToMap(this.level.clouds);
     this.addObjectsToMap(this.level.coins);
+    this.addObjectsToMap(this.level.bottles);
     this.addToMap(this.character);
     this.addObjectsToMap(this.level.enemies);
     this.addObjectsToMap(this.throwableObjects);
     this.ctx.translate(-this.camera_x, 0);
     this.addToMap(this.statusBar);
     this.addToMap(this.coinBar);
+    this.addToMap(this.bottleBar);
     requestAnimationFrame(() => this.draw());
   }
 

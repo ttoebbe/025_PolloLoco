@@ -1,5 +1,5 @@
 let canvas;
-let world; 
+let world;
 let keyboard = new Keyboard();
 
 function init() {
@@ -10,6 +10,7 @@ function init() {
 }
 
 window.addEventListener("keydown", (e) => {
+
   if (e.key === "ArrowRight") {
     keyboard.RIGHT = true;
   }
@@ -27,6 +28,10 @@ window.addEventListener("keydown", (e) => {
     console.log("SPACE pressed!");
     keyboard.SPACE = true;
   }
+  if (e.keyCode == 68) {
+    keyboard.D = true;
+
+  }
 });
 
 window.addEventListener("keyup", (e) => {
@@ -42,5 +47,10 @@ window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowDown") {
     keyboard.DOWN = false;
   }
-  // SPACE wird nicht auf false gesetzt - bleibt aktiv
+  // if (e.key === " ") {
+  //   keyboard.SPACE = false;
+  // }
+  // if (e.keyCode == 68) {
+  //   keyboard.D = false;
+  // }
 });

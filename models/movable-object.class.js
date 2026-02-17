@@ -16,11 +16,12 @@ class MovableObject extends DrawableObject {
   }
 
   isAboveGround() {
-    return this.y < 180;
+    if (this instanceof ThrowableObject) {
+      return true;
+    } else {
+      return this.y < 180;
+    }
   }
-
-
-
 
   isColliding(movableObject) {
     return (
@@ -50,7 +51,6 @@ class MovableObject extends DrawableObject {
   isDead() {
     return this.energy == 0;
   }
-
 
   playAnimation(images) {
     let i = this.currentImageIndex % images.length; // 0, 1, 2, 3, 4, 5 (Modulo-Operator)

@@ -1,5 +1,5 @@
 class ThrowableObject extends MovableObject {
-  constructor(x, y) {
+  constructor(x, y, isThrownLeft) {
     super().loadImage(
       "img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png",
     );
@@ -7,6 +7,8 @@ class ThrowableObject extends MovableObject {
     this.y = y;
     this.width = 50;
     this.height = 50;
+    this.isThrownLeft = isThrownLeft;
+    this.otherDirection = isThrownLeft;
     this.throw(x, y);
   }
 
@@ -17,7 +19,7 @@ class ThrowableObject extends MovableObject {
     
     if (MovableObject.gameStateManager) {
       MovableObject.gameStateManager.registerInterval(() => {
-        this.x += this.speed;
+        this.x += this.isThrownLeft ? -this.speed : this.speed;
       }, 25);
     }
   }

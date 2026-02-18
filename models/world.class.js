@@ -69,7 +69,13 @@ class World {
       this.keyboard.D = false;
       return;
     }
-    let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+    const isThrownLeft = this.character.otherDirection;
+    const offsetX = isThrownLeft ? -20 : 100;
+    const bottle = new ThrowableObject(
+      this.character.x + offsetX,
+      this.character.y + 100,
+      isThrownLeft,
+    );
     this.throwableObjects.push(bottle);
     this.collectedBottles = Math.max(0, this.collectedBottles - 1);
     this.updateBottleBar();

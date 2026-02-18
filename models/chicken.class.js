@@ -20,24 +20,27 @@ class Chicken extends MovableObject {
     this.loadImages(this.IMAGES_DEAD);
     this.x = 200 + Math.random() * 500;
     this.speed = 0.15 + Math.random() * 0.25;
-    this.animate();
   }
 
-  animate() {
-    this.startMovement();
-    this.startWalkingAnimation();
+  /**
+   * Starts chicken animations using game state manager
+   * @param {GameStateManager} gameStateManager - The game state manager instance
+   */
+  startAnimations(gameStateManager) {
+    this.startMovement(gameStateManager);
+    this.startWalkingAnimation(gameStateManager);
   }
 
-  startMovement() {
-    setInterval(() => {
+  startMovement(gameStateManager) {
+    gameStateManager.registerInterval(() => {
       if (!this.isDead()) {
         this.x -= this.speed;
       }
     }, 1000 / 60);
   }
 
-  startWalkingAnimation() {
-    setInterval(() => {
+  startWalkingAnimation(gameStateManager) {
+    gameStateManager.registerInterval(() => {
       if (this.isDead() && !this.isDying) {
         this.playDeathAnimation();
       } else if (!this.isDead()) {

@@ -34,11 +34,14 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
     this.x = 2500;
-    this.animate();
   }
 
-  animate() {
-    setInterval(() => {
+  /**
+   * Starts endboss animations using game state manager
+   * @param {GameStateManager} gameStateManager - The game state manager instance
+   */
+  startAnimations(gameStateManager) {
+    gameStateManager.registerInterval(() => {
       if (this.isDead() && !this.isDying) {
         this.playDeathAnimation();
       } else if (this.isHurt() && !this.isDead()) {

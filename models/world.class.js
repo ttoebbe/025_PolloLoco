@@ -15,6 +15,9 @@ class World {
   totalCoins = 0;
   maxBottles = 0;
   endbossNearby = false;
+  gameStateManager = new GameStateManager();
+  screenManager = new ScreenManager();
+  endbossDefeatedTime = 0;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -24,6 +27,7 @@ class World {
     this.maxBottles = this.level.bottles.length;
     this.updateCoinBar();
     this.updateBottleBar();
+    this.setupGameStateManager();
     this.draw();
     this.setWorld();
     this.run();
@@ -31,14 +35,31 @@ class World {
 
   setWorld() {
     this.character.world = this;
+    this.character.startAnimations(this.gameStateManager);
+    
+    // Start animations for all enemies that support it
+    this.level.enemies.forEach(enemy => {
+      if (typeof enemy.startAnimations === 'function') {
+        enemy.startAnimations(this.gameStateManager);
+      }
+    });
+    
+    // Start animations for clouds
+    this.level.clouds.forEach(cloud => {
+      if (typeof cloud.startAnimations === 'function') {
+        cloud.startAnimations(this.gameStateManager);
+      }
+    });
   }
 
   run() {
-    setInterval(() => {
+    this.gameStateManager.registerInterval(() => {
       this.checkCollisions();
       this.checkThrowableObject();
       this.checkEndbossProximity();
       this.cleanupDeadEnemies();
+      this.checkGameOver();
+      this.checkWinCondition();
     }, 200);
   }
 
@@ -210,21 +231,23 @@ class World {
   }
 
   draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToMap(this.level.backgroundObjects);
-    this.addObjectsToMap(this.level.clouds);
-    this.addObjectsToMap(this.level.coins);
-    this.addObjectsToMap(this.level.bottles);
-    this.addToMap(this.character);
-    this.addObjectsToMap(this.level.enemies);
-    this.addObjectsToMap(this.throwableObjects);
-    this.ctx.translate(-this.camera_x, 0);
-    this.addToMap(this.statusBar);
-    this.addToMap(this.coinBar);
-    this.addToMap(this.bottleBar);
-    if (this.endbossNearby) {
-      this.addToMap(this.endbossBar);
+    if (this.gameStateManager.isRunning()) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.translate(this.camera_x, 0);
+      this.addObjectsToMap(this.level.backgroundObjects);
+      this.addObjectsToMap(this.level.clouds);
+      this.addObjectsToMap(this.level.coins);
+      this.addObjectsToMap(this.level.bottles);
+      this.addToMap(this.character);
+      this.addObjectsToMap(this.level.enemies);
+      this.addObjectsToMap(this.throwableObjects);
+      this.ctx.translate(-this.camera_x, 0);
+      this.addToMap(this.statusBar);
+      this.addToMap(this.coinBar);
+      this.addToMap(this.bottleBar);
+      if (this.endbossNearby) {
+        this.addToMap(this.endbossBar);
+      }
     }
     requestAnimationFrame(() => this.draw());
   }
@@ -256,5 +279,77 @@ class World {
   flipImageBack(movableObject) {
     movableObject.x = movableObject.x * -1;
     this.ctx.restore();
+  }
+
+  /**
+   * Sets up game state manager and screen event listeners
+   */
+  setupGameStateManager() {
+    MovableObject.setGameStateManager(this.gameStateManager);
+    document.addEventListener('gameRestart', () => {
+      this.restart();
+    });
+  }
+
+  /**
+   * Checks if game over condition is met
+   */
+  checkGameOver() {
+    if (this.character.isDead() && this.gameStateManager.isRunning()) {
+      this.gameStateManager.setState(GameStateManager.STATES.GAME_OVER);
+      this.screenManager.showGameOver();
+    }
+  }
+
+  /**
+   * Checks if win condition is met (endboss defeated)
+   */
+  checkWinCondition() {
+    let endboss = this.level.enemies.find(enemy => enemy instanceof Endboss);
+    
+    if (!endboss || !endboss.isDead()) return;
+    if (this.endbossDefeatedTime === 0) {
+      this.endbossDefeatedTime = new Date().getTime();
+    }
+    
+    let timeSinceDefeat = (new Date().getTime() - this.endbossDefeatedTime) / 1000;
+    
+    if (timeSinceDefeat >= 3 && this.gameStateManager.isRunning()) {
+      this.gameStateManager.setState(GameStateManager.STATES.WON);
+      this.screenManager.showWinScreen();
+    }
+  }
+
+  /**
+   * Restarts the game to initial state
+   */
+  restart() {
+    this.gameStateManager.clearAll();
+    this.screenManager.hideScreens();
+    this.gameStateManager.setState(GameStateManager.STATES.RUNNING);
+    
+    // Reset game state
+    this.character = new Character();
+    this.level = level1;
+    this.camera_x = 0;
+    this.throwableObjects = [];
+    this.collectedCoins = 0;
+    this.collectedBottles = 0;
+    this.totalCoins = this.level.coins.length;
+    this.maxBottles = this.level.bottles.length;
+    this.endbossNearby = false;
+    this.endbossDefeatedTime = 0;
+    
+    // Reset UI bars
+    this.updateCoinBar();
+    this.updateBottleBar();
+    this.endbossBar.setPercentage(100);
+    
+    // Reset game state manager reference
+    MovableObject.setGameStateManager(this.gameStateManager);
+    
+    // Restart game loop and animations
+    this.setWorld();
+    this.run();
   }
 }

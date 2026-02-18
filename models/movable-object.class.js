@@ -5,14 +5,26 @@ class MovableObject extends DrawableObject {
   acceleration = 1.1;
   energy = 100;
   lastHit = 0;
+  
+  static gameStateManager = null;
+
+  /**
+   * Sets the static game state manager reference
+   * @param {GameStateManager} gameStateManager - The game state manager instance
+   */
+  static setGameStateManager(gameStateManager) {
+    MovableObject.gameStateManager = gameStateManager;
+  }
 
   applyGravity() {
-    setInterval(() => {
-      if (this.isAboveGround() || this.speedY > 0) {
-        this.y -= this.speedY;
-        this.speedY -= this.acceleration;
-      }
-    }, 1000 / 25);
+    if (MovableObject.gameStateManager) {
+      MovableObject.gameStateManager.registerInterval(() => {
+        if (this.isAboveGround() || this.speedY > 0) {
+          this.y -= this.speedY;
+          this.speedY -= this.acceleration;
+        }
+      }, 1000 / 25);
+    }
   }
 
   isAboveGround() {

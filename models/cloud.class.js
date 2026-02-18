@@ -7,10 +7,14 @@ constructor() {
     super().loadImage('img/5_background/layers/4_clouds/1.png');
  
     this.x = Math.random() * 500; 
-    this.animate();
     }
-    animate() {
-        setInterval(() => {
+    
+    /**
+     * Starts cloud animations using game state manager
+     * @param {GameStateManager} gameStateManager - The game state manager instance
+     */
+    startAnimations(gameStateManager) {
+        gameStateManager.registerInterval(() => {
             this.x -= 0.15;
         }, 1000 / 60);
     }

@@ -14,8 +14,11 @@ class ThrowableObject extends MovableObject {
     this.speedY = 10;
     this.speed = 15;
     this.applyGravity();
-    setInterval(() => {
-      this.x += this.speed;
-    }, 25);
+    
+    if (MovableObject.gameStateManager) {
+      MovableObject.gameStateManager.registerInterval(() => {
+        this.x += this.speed;
+      }, 25);
+    }
   }
 }

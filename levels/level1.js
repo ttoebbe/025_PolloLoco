@@ -36,12 +36,23 @@ const level1Bottles = [
  */
 function createLevel1() {
   return new Level(
-    [new Chicken(), new Chicken(), new Chicken(), new Endboss()],
+    [
+      new Chicken(),
+      new Chicken(),
+      new Chicken(),
+      new Chicken(),
+      new Chicken(),
+      new Chicken(),
+      new Endboss(),
+    ],
     [new Cloud()],
     [
       new BackgroundObject("img/5_background/layers/air.png", -719),
       new BackgroundObject("img/5_background/layers/3_third_layer/2.png", -719),
-      new BackgroundObject("img/5_background/layers/2_second_layer/2.png", -719),
+      new BackgroundObject(
+        "img/5_background/layers/2_second_layer/2.png",
+        -719,
+      ),
       new BackgroundObject("img/5_background/layers/1_first_layer/2.png", -719),
 
       new BackgroundObject("img/5_background/layers/air.png", 0),
@@ -65,7 +76,7 @@ function createLevel1() {
       ),
       new BackgroundObject(
         "img/5_background/layers/1_first_layer/1.png",
-        719 * 2,
+        719 * 2, 
       ),
 
       new BackgroundObject("img/5_background/layers/air.png", 719 * 3),
@@ -101,6 +112,10 @@ function createLevel1() {
       new Bottle(520, 330),
       new Bottle(700, 350),
       new Bottle(920, 330),
+      new Bottle(360, 80),
+      new Bottle(520, 180),
+      new Bottle(700, 280),
+      new Bottle(920, 180),
       new Bottle(1080, 350),
       new Bottle(1300, 330),
       new Bottle(1500, 350),

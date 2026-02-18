@@ -63,7 +63,10 @@ class MovableObject extends DrawableObject {
    */
   isCollidingFromAbove(movableObject) {
     if (!this.isColliding(movableObject)) return false;
-    
+
+    // Only count when falling onto the enemy
+    if (this.speedY >= 0) return false;
+
     // Character bottom should be close to or above enemy top (within 30px)
     return (this.y + this.height) <= (movableObject.y + 30);
   }

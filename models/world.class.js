@@ -60,7 +60,7 @@ class World {
       this.checkGameOver();
       this.checkWinCondition();
       this.cleanupDeadEnemies();
-    }, 200);
+    }, 1000 / 60);
   }
 
   checkThrowableObject() {

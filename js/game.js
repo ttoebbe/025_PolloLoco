@@ -1,13 +1,23 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let screenManager;
 
 function init() {
   canvas = document.getElementById("canvas");
-  world = new World(canvas, keyboard);
-
-  console.log("My Character is", world.character);
+  world = null;
+  screenManager = new ScreenManager();
+  screenManager.showStartScreen();
 }
+
+function startGame() {
+  if (world) return;
+  world = new World(canvas, keyboard);
+}
+
+document.addEventListener("gameStart", () => {
+  startGame();
+});
 
 window.addEventListener("keydown", (e) => {
 

@@ -1,6 +1,6 @@
 class World {
   character = new Character();
-  level = level1;
+  level = createLevel1();
   canvas;
   ctx;
   keyboard;
@@ -57,9 +57,9 @@ class World {
       this.checkCollisions();
       this.checkThrowableObject();
       this.checkEndbossProximity();
-      this.cleanupDeadEnemies();
       this.checkGameOver();
       this.checkWinCondition();
+      this.cleanupDeadEnemies();
     }, 200);
   }
 
@@ -194,13 +194,16 @@ class World {
   }
 
   /**
-   * Removes dead enemies after 3 seconds
+   * Removes dead enemies after 3 seconds (except Endboss)
    */
   cleanupDeadEnemies() {
     let currentTime = new Date().getTime();
     
     for (let i = this.level.enemies.length - 1; i >= 0; i--) {
       let enemy = this.level.enemies[i];
+      
+      // Don't remove Endboss - player should see it when they win
+      if (enemy instanceof Endboss) continue;
       
       if (enemy.isDead() && enemy.deathTime > 0) {
         let timeSinceDeath = (currentTime - enemy.deathTime) / 1000;
@@ -330,7 +333,7 @@ class World {
     
     // Reset game state
     this.character = new Character();
-    this.level = level1;
+    this.level = createLevel1();
     this.camera_x = 0;
     this.throwableObjects = [];
     this.collectedCoins = 0;

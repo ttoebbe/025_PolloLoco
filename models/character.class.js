@@ -2,6 +2,7 @@ class Character extends MovableObject {
   height = 250;
   y = 80;
   speed = 10;
+  collisionOffsets = { left: 12, right: 12, top: 120 };
   IMAGES_WALKING = [
     "img/2_character_pepe/2_walk/W-21.png",
     "img/2_character_pepe/2_walk/W-22.png",

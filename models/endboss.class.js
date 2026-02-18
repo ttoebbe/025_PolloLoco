@@ -2,6 +2,7 @@ class Endboss extends MovableObject {
   height = 400;
   width = 300;
   y = 50;
+  collisionOffsets = { left: 90, right: 8, top: 20 };
   energy = 10;
   isDying = false;
   deathTime = 0;

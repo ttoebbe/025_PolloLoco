@@ -2,7 +2,7 @@ class MovableObject extends DrawableObject {
   speed = 0.1;
   otherDirection = false;
   speedY = 0;
-  acceleration = 1.1;
+  acceleration = 1.3;
   energy = 100;
   lastHit = 0;
   
@@ -36,11 +36,14 @@ class MovableObject extends DrawableObject {
   }
 
   isColliding(movableObject) {
+    const selfBounds = this.getCollisionBounds();
+    const otherBounds = movableObject.getCollisionBounds();
+
     return (
-      this.x + this.width > movableObject.x &&
-      this.y + this.height > movableObject.y &&
-      this.x < movableObject.x + movableObject.width &&
-      this.y < movableObject.y + movableObject.height
+      selfBounds.right > otherBounds.left &&
+      selfBounds.bottom > otherBounds.top &&
+      selfBounds.left < otherBounds.right &&
+      selfBounds.top < otherBounds.bottom
     );
   }
 
@@ -51,9 +54,11 @@ class MovableObject extends DrawableObject {
    */
   isCollidingFromSide(movableObject) {
     if (!this.isColliding(movableObject)) return false;
+    const selfBounds = this.getCollisionBounds();
+    const otherBounds = movableObject.getCollisionBounds();
     
     // Character bottom should be more than 30px below enemy top for side collision
-    return (this.y + this.height) > (movableObject.y + 30);
+    return selfBounds.bottom > (otherBounds.top + 30);
   }
 
   /**
@@ -63,12 +68,14 @@ class MovableObject extends DrawableObject {
    */
   isCollidingFromAbove(movableObject) {
     if (!this.isColliding(movableObject)) return false;
+    const selfBounds = this.getCollisionBounds();
+    const otherBounds = movableObject.getCollisionBounds();
 
     // Only count when falling onto the enemy
     if (this.speedY >= 0) return false;
 
     // Character bottom should be close to or above enemy top (within 30px)
-    return (this.y + this.height) <= (movableObject.y + 30);
+    return selfBounds.bottom <= (otherBounds.top + 30);
   }
 
   hit() {
@@ -109,7 +116,7 @@ class MovableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 22;
+    this.speedY = 18;
     this.world.keyboard.SPACE = false; // Reset after jump
   }
 }

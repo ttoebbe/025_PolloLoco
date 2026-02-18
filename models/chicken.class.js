@@ -2,6 +2,7 @@ class Chicken extends MovableObject {
   y = 360;
   height = 60;
   width = 80;
+  collisionOffsets = { left: 2, right: 2, top: 4 };
   energy = 1;
   isDying = false;
   deathTime = 0;

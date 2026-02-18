@@ -1,4 +1,6 @@
 class ThrowableObject extends MovableObject {
+  collisionOffsets = { left: 8, right: 8, top: 8 };
+
   constructor(x, y, isThrownLeft) {
     super().loadImage(
       "img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png",

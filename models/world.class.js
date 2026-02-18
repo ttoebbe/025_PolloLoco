@@ -8,11 +8,13 @@ class World {
   statusBar = new StatusBar();
   coinBar = new CoinStatusBar();
   bottleBar = new BottleStatusBar();
+  endbossBar = new EndbossStatusBar();
   throwableObjects = [];
   collectedCoins = 0;
   collectedBottles = 0;
   totalCoins = 0;
   maxBottles = 0;
+  endbossNearby = false;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -35,6 +37,8 @@ class World {
     setInterval(() => {
       this.checkCollisions();
       this.checkThrowableObject();
+      this.checkEndbossProximity();
+      this.cleanupDeadEnemies();
     }, 200);
   }
 
@@ -55,13 +59,19 @@ class World {
     this.checkEnemyCollisions();
     this.checkCoinCollisions();
     this.checkBottleCollisions();
+    this.checkThrowableCollisions();
   }
 
   checkEnemyCollisions() {
     this.level.enemies.forEach((enemy) => {
       if (!this.character.isColliding(enemy)) return;
-      this.character.hit();
-      this.statusBar.setPercentage(this.character.energy);
+      if (enemy.isDead()) return;
+      
+      if (this.character.isCollidingFromAbove(enemy)) {
+        this.handleJumpOnEnemy(enemy);
+      } else if (this.character.isCollidingFromSide(enemy)) {
+        this.handleSideCollisionWithEnemy(enemy);
+      }
     });
   }
 
@@ -80,6 +90,104 @@ class World {
       this.level.bottles.splice(i, 1);
       this.collectedBottles++;
       this.updateBottleBar();
+    }
+  }
+
+  /**
+   * Handles character jumping on enemy
+   * @param {MovableObject} enemy - The enemy being jumped on
+   */
+  handleJumpOnEnemy(enemy) {
+    if (enemy instanceof Endboss) {
+      this.character.jump(); // Bounce off endboss
+    } else {
+      enemy.hit();
+      this.character.jump();
+    }
+  }
+
+  /**
+   * Handles side collision with enemy
+   * @param {MovableObject} enemy - The enemy colliding with
+   */
+  handleSideCollisionWithEnemy(enemy) {
+    if (this.character.isHurt()) return;
+    
+    if (enemy instanceof Endboss) {
+      this.character.hit();
+      this.character.hit(); // Double damage for endboss
+    } else {
+      this.character.hit();
+    }
+    this.statusBar.setPercentage(this.character.energy);
+  }
+
+  /**
+   * Checks collisions between throwable objects and enemies
+   */
+  checkThrowableCollisions() {
+    for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
+      let bottle = this.throwableObjects[i];
+      let bottleHit = false;
+      
+      this.level.enemies.forEach((enemy) => {
+        if (bottleHit) return;
+        if (!bottle.isColliding(enemy)) return;
+        if (enemy.isDead()) return;
+        
+        enemy.hit();
+        bottleHit = true;
+        
+        if (enemy instanceof Endboss) {
+          this.updateEndbossBar();
+        }
+      });
+      
+      if (bottleHit) {
+        this.throwableObjects.splice(i, 1);
+      }
+    }
+  }
+
+  /**
+   * Checks if endboss is nearby and updates proximity flag
+   */
+  checkEndbossProximity() {
+    let previousState = this.endbossNearby;
+    this.endbossNearby = this.character.x > 2200;
+    
+    if (this.endbossNearby && !previousState) {
+      this.updateEndbossBar();
+    }
+  }
+
+  /**
+   * Updates endboss status bar percentage
+   */
+  updateEndbossBar() {
+    let endboss = this.level.enemies.find(enemy => enemy instanceof Endboss);
+    if (endboss) {
+      let percentage = (endboss.energy / 10) * 100;
+      this.endbossBar.setPercentage(percentage);
+    }
+  }
+
+  /**
+   * Removes dead enemies after 3 seconds
+   */
+  cleanupDeadEnemies() {
+    let currentTime = new Date().getTime();
+    
+    for (let i = this.level.enemies.length - 1; i >= 0; i--) {
+      let enemy = this.level.enemies[i];
+      
+      if (enemy.isDead() && enemy.deathTime > 0) {
+        let timeSinceDeath = (currentTime - enemy.deathTime) / 1000;
+        
+        if (timeSinceDeath >= 3) {
+          this.level.enemies.splice(i, 1);
+        }
+      }
     }
   }
 
@@ -115,6 +223,9 @@ class World {
     this.addToMap(this.statusBar);
     this.addToMap(this.coinBar);
     this.addToMap(this.bottleBar);
+    if (this.endbossNearby) {
+      this.addToMap(this.endbossBar);
+    }
     requestAnimationFrame(() => this.draw());
   }
 

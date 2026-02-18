@@ -32,6 +32,30 @@ class MovableObject extends DrawableObject {
     );
   }
 
+  /**
+   * Checks if collision is from the side (horizontal)
+   * @param {MovableObject} movableObject - Object to check collision with
+   * @returns {boolean} True if collision is from side
+   */
+  isCollidingFromSide(movableObject) {
+    if (!this.isColliding(movableObject)) return false;
+    
+    // Character bottom should be more than 30px below enemy top for side collision
+    return (this.y + this.height) > (movableObject.y + 30);
+  }
+
+  /**
+   * Checks if collision is from above (character jumping on enemy)
+   * @param {MovableObject} movableObject - Object to check collision with
+   * @returns {boolean} True if collision is from above
+   */
+  isCollidingFromAbove(movableObject) {
+    if (!this.isColliding(movableObject)) return false;
+    
+    // Character bottom should be close to or above enemy top (within 30px)
+    return (this.y + this.height) <= (movableObject.y + 30);
+  }
+
   hit() {
     this.energy -= 5;
     this.lastHit = new Date().getTime();

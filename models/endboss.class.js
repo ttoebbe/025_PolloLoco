@@ -6,6 +6,10 @@ class Endboss extends MovableObject {
   energy = 10;
   isDying = false;
   deathTime = 0;
+  deathAnimationIndex = 0;
+  deathAnimationFinished = false;
+  lastDeathFrameTime = 0;
+  deathFrameDuration = 200;
 
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
@@ -20,14 +24,14 @@ class Endboss extends MovableObject {
 
   IMAGES_HURT = [
     "img/4_enemie_boss_chicken/4_hurt/G21.png",
-    "img/4_enemie_boss_chicken/4_hurt/G21.png",
-    "img/4_enemie_boss_chicken/4_hurt/G21.png",
+    "img/4_enemie_boss_chicken/4_hurt/G22.png",
+    "img/4_enemie_boss_chicken/4_hurt/G23.png",
   ];
 
   IMAGES_DEAD = [
     "img/4_enemie_boss_chicken/5_dead/G24.png",
-    "img/4_enemie_boss_chicken/5_dead/G24.png",
-    "img/4_enemie_boss_chicken/5_dead/G24.png",
+    "img/4_enemie_boss_chicken/5_dead/G25.png",
+    "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
   constructor() {
     super().loadImage("img/4_enemie_boss_chicken/2_alert/G5.png");
@@ -43,37 +47,63 @@ class Endboss extends MovableObject {
    */
   startAnimations(gameStateManager) {
     gameStateManager.registerInterval(() => {
-      if (this.isDead() && !this.isDying) {
-        this.playDeathAnimation();
-      } else if (this.isHurt() && !this.isDead()) {
-        this.playAnimation(this.IMAGES_HURT);
-      } else if (!this.isDead() && !this.isHurt()) {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
-      // Stop any movement when dead
       if (this.isDead()) {
+        this.playDeathAnimation();
         this.speed = 0;
+        return;
       }
+      if (this.isHurt()) {
+        this.playAnimation(this.IMAGES_HURT);
+        return;
+      }
+      this.playAnimation(this.IMAGES_WALKING);
     }, 200);
   }
 
   /**
-   * Plays death animation once
+   * Plays death animation until last frame and keeps it there
    */
   playDeathAnimation() {
-    this.isDying = true;
-    this.playAnimation(this.IMAGES_DEAD);
+    let now = Date.now();
+    if (!this.isDying) {
+      this.isDying = true;
+      this.deathAnimationIndex = 0;
+      this.deathAnimationFinished = false;
+      this.lastDeathFrameTime = now;
+      this.setDeathFrame();
+      return;
+    }
+    if (this.deathAnimationFinished) {
+      this.setDeathFrame(this.IMAGES_DEAD.length - 1);
+      return;
+    }
+    if (now - this.lastDeathFrameTime < this.deathFrameDuration) return;
+    this.lastDeathFrameTime = now;
+    this.deathAnimationIndex++;
+    if (this.deathAnimationIndex >= this.IMAGES_DEAD.length - 1) {
+      this.deathAnimationIndex = this.IMAGES_DEAD.length - 1;
+      this.deathAnimationFinished = true;
+    }
+    this.setDeathFrame();
+  }
+
+  setDeathFrame(index = this.deathAnimationIndex) {
+    let path = this.IMAGES_DEAD[index];
+    this.img = this.imageCache[path];
   }
 
   /**
    * Endboss takes 1 damage (1/10 of health)
    */
   hit() {
+    if (this.isDead()) return;
     this.energy -= 1;
-    this.lastHit = new Date().getTime();
+    this.lastHit = Date.now();
     if (this.energy <= 0) {
       this.energy = 0;
-      this.deathTime = new Date().getTime();
+      if (this.deathTime === 0) {
+        this.deathTime = Date.now();
+      }
     }
   }
 }

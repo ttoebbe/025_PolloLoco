@@ -63,12 +63,23 @@ class World {
     }, 1000 / 60);
   }
 
+  /**
+   * Checks if player wants to throw a bottle
+   */
   checkThrowableObject() {
     if (!this.keyboard.D) return;
     if (this.collectedBottles <= 0) {
       this.keyboard.D = false;
       return;
     }
+    this.throwBottle();
+    this.keyboard.D = false;
+  }
+
+  /**
+   * Creates and throws a bottle in character direction
+   */
+  throwBottle() {
     const isThrownLeft = this.character.otherDirection;
     const offsetX = isThrownLeft ? -20 : 100;
     const bottle = new ThrowableObject(
@@ -79,7 +90,6 @@ class World {
     this.throwableObjects.push(bottle);
     this.collectedBottles = Math.max(0, this.collectedBottles - 1);
     this.updateBottleBar();
-    this.keyboard.D = false;
   }
 
   checkCollisions() {
@@ -152,28 +162,50 @@ class World {
   /**
    * Checks collisions between throwable objects and enemies
    */
+  /**
+   * Checks collisions between throwable objects and enemies
+   */
   checkThrowableCollisions() {
     for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
       let bottle = this.throwableObjects[i];
-      let bottleHit = false;
-      
-      this.level.enemies.forEach((enemy) => {
-        if (bottleHit) return;
-        if (!bottle.isColliding(enemy)) return;
-        if (enemy.isDead()) return;
-        
-        enemy.hit();
-        bottleHit = true;
-        
-        if (enemy instanceof Endboss) {
-          enemy.applyStun();
-          this.updateEndbossBar();
-        }
-      });
+      let bottleHit = this.checkBottleHitEnemies(bottle);
       
       if (bottleHit) {
         this.throwableObjects.splice(i, 1);
       }
+    }
+  }
+
+  /**
+   * Checks if bottle hits any enemy
+   * @param {ThrowableObject} bottle - The bottle to check
+   * @returns {boolean} True if bottle hit an enemy
+   */
+  checkBottleHitEnemies(bottle) {
+    let bottleHit = false;
+    
+    this.level.enemies.forEach((enemy) => {
+      if (bottleHit) return;
+      if (!bottle.isColliding(enemy)) return;
+      if (enemy.isDead()) return;
+      
+      this.handleBottleEnemyHit(enemy);
+      bottleHit = true;
+    });
+    
+    return bottleHit;
+  }
+
+  /**
+   * Handles bottle hitting an enemy
+   * @param {MovableObject} enemy - The enemy that was hit
+   */
+  handleBottleEnemyHit(enemy) {
+    enemy.hit();
+    
+    if (enemy instanceof Endboss) {
+      enemy.applyStun();
+      this.updateEndbossBar();
     }
   }
 
@@ -342,11 +374,25 @@ class World {
    * Restarts the game to initial state
    */
   restart() {
+    this.clearGameState();
+    this.resetGameObjects();
+    this.resetUIBars();
+    this.reinitializeGame();
+  }
+
+  /**
+   * Clears current game state and screens
+   */
+  clearGameState() {
     this.gameStateManager.clearAll();
     this.screenManager.hideScreens();
     this.gameStateManager.setState(GameStateManager.STATES.RUNNING);
-    
-    // Reset game state
+  }
+
+  /**
+   * Resets all game objects to initial state
+   */
+  resetGameObjects() {
     this.character = new Character();
     this.level = createLevel1();
     this.camera_x = 0;
@@ -357,17 +403,23 @@ class World {
     this.maxBottles = this.level.bottles.length;
     this.endbossNearby = false;
     this.endbossDefeatedTime = 0;
-    
-    // Reset UI bars
+  }
+
+  /**
+   * Resets all UI status bars
+   */
+  resetUIBars() {
     this.updateHealthBar();
     this.updateCoinBar();
     this.updateBottleBar();
     this.endbossBar.setPercentage(100);
-    
-    // Reset game state manager reference
+  }
+
+  /**
+   * Reinitializes game systems and starts new game
+   */
+  reinitializeGame() {
     MovableObject.setGameStateManager(this.gameStateManager);
-    
-    // Restart game loop and animations
     this.setWorld();
     this.run();
   }

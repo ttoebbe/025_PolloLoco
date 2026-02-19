@@ -57,7 +57,15 @@ class Character extends MovableObject {
    */
   startAnimations(gameStateManager) {
     this.applyGravity();
-    
+    this.startMovementLoop(gameStateManager);
+    this.startAnimationLoop(gameStateManager);
+  }
+
+  /**
+   * Starts character movement and camera logic
+   * @param {GameStateManager} gameStateManager - The game state manager instance
+   */
+  startMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
         this.moveRight();
@@ -73,7 +81,13 @@ class Character extends MovableObject {
 
       this.world.camera_x = -this.x + 100;
     }, 1000 / 60);
+  }
 
+  /**
+   * Starts character animation logic
+   * @param {GameStateManager} gameStateManager - The game state manager instance
+   */
+  startAnimationLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
@@ -83,7 +97,6 @@ class Character extends MovableObject {
         this.playAnimation(this.IMAGES_JUMPING);
       } else {
         if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-          //walk animation
           this.playAnimation(this.IMAGES_WALKING);
         }
       }

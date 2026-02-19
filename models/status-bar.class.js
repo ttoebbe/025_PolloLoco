@@ -10,23 +10,33 @@ class StatusBar extends DrawableObject {
 
   percentage = 100;
 
-  //ein constructor ist eine Funktion, die automatisch aufgerufen wird, wenn ein neues Objekt der Klasse erstellt wird. Er dient dazu, die Eigenschaften des Objekts zu initialisieren.
+  /**
+   * Constructor initializes the status bar with health images
+   */
   constructor() {
-    super(); // Ruft den Konstruktor der übergeordneten Klasse (DrawableObject) auf
-    this.loadImages(this.IMAGES); // Lädt die Bilder in den imageCache
+    super();
+    this.loadImages(this.IMAGES);
     this.x = 30;
     this.y = 0;
     this.width = 200;
     this.height = 50;
-    this.setPercentage(100); // Setzt den Anfangsprozentsatz auf 100%
+    this.setPercentage(100);
   }
 
+  /**
+   * Updates the percentage and corresponding image
+   * @param {number} percentage - The new percentage value
+   */
   setPercentage(percentage) {
-    this.percentage = percentage; // Aktualisiert den Prozentsatz
+    this.percentage = percentage;
     let path = this.IMAGES[this.resolveImageIndex()];
-    this.img = this.imageCache[path]; // Aktualisiert das Bild basierend auf dem neuen Prozentsatz
+    this.img = this.imageCache[path];
   }
 
+  /**
+   * Resolves the image index based on current percentage
+   * @returns {number} Image index for current health percentage
+   */
   resolveImageIndex() {
     if (this.percentage == 100) {
       return 5;

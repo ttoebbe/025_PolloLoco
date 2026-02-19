@@ -135,41 +135,70 @@ class Endboss extends MovableObject {
    * Updates horizontal chase movement towards character
    */
   updateChaseMovement() {
-    if (!this.targetCharacter || this.isDead()) {
-      this.isMoving = false;
-      this.speed = 0;
+    if (this.shouldStopMoving()) {
+      this.stopMovement();
       return;
     }
-    if (this.isStunned()) {
-      this.isMoving = false;
-      this.speed = 0;
+    
+    if (!this.shouldStartChase()) {
+      this.stopMovement();
       return;
     }
-    let deltaX = this.targetCharacter.x - this.x;
+    
+    this.executeChaseMovement();
+  }
+
+  /**
+   * Checks if endboss should stop moving
+   * @returns {boolean} True if should stop moving
+   */
+  shouldStopMoving() {
+    return !this.targetCharacter || this.isDead() || this.isStunned();
+  }
+
+  /**
+   * Checks if chase should start or continue
+   * @returns {boolean} True if should chase
+   */
+  shouldStartChase() {
     let distanceToTarget = this.getDistanceToTarget();
+    
     if (!this.chaseActivated && distanceToTarget > this.chaseActivationDistance) {
-      this.isMoving = false;
-      this.speed = 0;
-      return;
+      return false;
     }
+    
     if (!this.chaseActivated && distanceToTarget <= this.chaseActivationDistance) {
       this.chaseActivated = true;
     }
+    
+    return distanceToTarget > this.chaseStopDistance;
+  }
+
+  /**
+   * Stops endboss movement
+   */
+  stopMovement() {
+    this.isMoving = false;
+    this.speed = 0;
+  }
+
+  /**
+   * Executes chase movement towards target
+   */
+  executeChaseMovement() {
+    let deltaX = this.targetCharacter.x - this.x;
     let chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
-    if (distanceToTarget <= this.chaseStopDistance) {
-      this.isMoving = false;
-      this.speed = 0;
-      return;
-    }
+    
     this.speed = chaseSpeed;
     this.isMoving = true;
+    
     if (deltaX < 0) {
       this.x -= chaseSpeed;
       this.otherDirection = false;
-      return;
+    } else {
+      this.x += chaseSpeed;
+      this.otherDirection = true;
     }
-    this.x += chaseSpeed;
-    this.otherDirection = true;
   }
 
   /**

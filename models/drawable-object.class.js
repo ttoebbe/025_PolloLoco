@@ -8,18 +8,27 @@ class DrawableObject {
   currentImageIndex = 0;
   collisionOffsets = { left: 0, right: 0, top: 0 };
 
-
-  
+  /**
+   * Loads a single image from the given path
+   * @param {string} path - Path to the image file
+   */
   loadImage(path) {
     this.img = new Image();
     this.img.src = path;
   }
 
-
-  draw(ctx) {
-    ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+  /**
+   * Draws the object on the canvas context
+   * @param {CanvasRenderingContext2D} context - Canvas rendering context
+   */
+  draw(context) {
+    context.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 
+  /**
+   * Gets collision bounds considering offsets
+   * @returns {Object} Collision bounds with left, right, top, bottom, width, height
+   */
   getCollisionBounds() {
     const leftOffset = Math.max(0, this.collisionOffsets?.left ?? 0);
     const rightOffset = Math.max(0, this.collisionOffsets?.right ?? 0);
@@ -35,14 +44,15 @@ class DrawableObject {
     return { left, right, top, bottom, width, height };
   }
 
-  
-  loadImages(arr) {
-    arr.forEach((path) => {
-      let img = new Image();
-      img.src = path;
-      this.imageCache[path] = img;
+  /**
+   * Loads multiple images into cache
+   * @param {Array<string>} imageArray - Array of image paths to load
+   */
+  loadImages(imageArray) {
+    imageArray.forEach((path) => {
+      let image = new Image();
+      image.src = path;
+      this.imageCache[path] = image;
     });
   }
-
-
 }

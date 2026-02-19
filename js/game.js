@@ -35,7 +35,6 @@ window.addEventListener("keydown", (e) => {
   }
   if (e.key === " ") {
     e.preventDefault();
-    console.log("SPACE pressed!");
     keyboard.SPACE = true;
   }
   if (e.keyCode == 68) {
@@ -57,10 +56,4 @@ window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowDown") {
     keyboard.DOWN = false;
   }
-  // if (e.key === " ") {
-  //   keyboard.SPACE = false;
-  // }
-  // if (e.keyCode == 68) {
-  //   keyboard.D = false;
-  // }
 });

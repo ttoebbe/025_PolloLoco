@@ -19,7 +19,7 @@ class StatusBar extends DrawableObject {
     this.width = 200;
     this.height = 50;
     this.setPercentage(100); // Setzt den Anfangsprozentsatz auf 100%
-}
+  }
 
   setPercentage(percentage) {
     this.percentage = percentage; // Aktualisiert den Prozentsatz

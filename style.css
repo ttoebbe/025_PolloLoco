@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Rye&display=swap");
 
+:root {
+    --page-padding: 24px;
+    --ui-space: 170px;
+    --canvas-max-width: 720px;
+}
+
 html,
 body {
     min-height: 100%;
@@ -12,13 +18,13 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
+    padding: var(--page-padding);
     overflow: hidden;
     background-color: #c79a59;
 }
 
 .game-page {
-    width: min(100%, 760px);
+    width: min(100%, calc(var(--canvas-max-width) + 40px));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,7 +44,13 @@ body {
 }
 
 .canvas-shell {
-    width: min(720px, calc(100vw - 48px));
+    width: min(
+        var(--canvas-max-width),
+        calc(100vw - (var(--page-padding) * 2)),
+        calc((100dvh - var(--ui-space)) * 1.5)
+    );
+    max-height: calc(100dvh - var(--ui-space));
+    aspect-ratio: 720 / 480;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     overflow: hidden;
@@ -49,13 +61,18 @@ body {
 canvas {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     background-color: black;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 760px) {
+    :root {
+        --page-padding: 14px;
+        --ui-space: 130px;
+    }
+
     body {
-        padding: 14px;
+        padding: var(--page-padding);
     }
 
     .game-page {
@@ -63,8 +80,30 @@ canvas {
     }
 
     .canvas-shell {
-        width: min(720px, calc(100vw - 28px));
+        width: min(
+            var(--canvas-max-width),
+            calc(100vw - (var(--page-padding) * 2)),
+            calc((100dvh - var(--ui-space)) * 1.5)
+        );
         border-radius: 10px;
+    }
+}
+
+@media (max-height: 560px) {
+    :root {
+        --page-padding: 10px;
+        --ui-space: 30px;
+    }
+
+    body {
+        overflow: auto;
+        align-items: flex-start;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .game-title {
+        display: none;
     }
 }
 
@@ -91,6 +130,7 @@ canvas {
 }
 
 .screen-content {
+    width: min(92vw, 760px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,13 +142,14 @@ canvas {
 
 .screen-image {
     display: block;
-    max-width: 400px;
+    width: min(90vw, 400px);
+    max-width: 90vw;
     max-height: 300px;
     margin-bottom: 20px;
 }
 
 .screen-text {
-    font-size: 24px;
+    font-size: clamp(16px, 3.2vw, 24px);
     margin: 20px 0;
     font-family: Arial, sans-serif;
 }
@@ -118,8 +159,8 @@ canvas {
     background-color: #ff6b35;
     color: white;
     border: none;
-    padding: 15px 30px;
-    font-size: 20px;
+    padding: clamp(10px, 2.4vw, 15px) clamp(18px, 4vw, 30px);
+    font-size: clamp(16px, 2.8vw, 20px);
     border-radius: 10px;
     cursor: pointer;
     margin: 20px auto 0;
@@ -157,8 +198,8 @@ canvas {
     background-color: #2d9cdb;
     color: white;
     border: none;
-    padding: 12px 24px;
-    font-size: 18px;
+    padding: clamp(10px, 2.2vw, 12px) clamp(16px, 4vw, 24px);
+    font-size: clamp(14px, 2.4vw, 18px);
     border-radius: 10px;
     cursor: pointer;
     font-family: Arial, sans-serif;

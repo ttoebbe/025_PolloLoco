@@ -1,3 +1,6 @@
+const level1 = createLevel1();
+
+
 const level1Coins = [
   new Coin(300, 260),
   new Coin(460, 220),
@@ -139,5 +142,3 @@ function createLevel1() {
   );
 }
 
-// Create initial level1 for backward compatibility
-const level1 = createLevel1();

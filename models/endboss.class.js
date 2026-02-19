@@ -4,6 +4,15 @@ class Endboss extends MovableObject {
   y = 50;
   collisionOffsets = { left: 90, right: 8, top: 20 };
   energy = 10;
+  speed = 0;
+  targetCharacter = null;
+  isMoving = false;
+  stunDurationMs = 500;
+  stunnedUntil = 0;
+  chaseActivated = false;
+  chaseActivationDistance = 600;
+  baseSpeedFactor = 0.3;
+  chaseStopDistance = 4;
   isDying = false;
   deathTime = 0;
   deathAnimationIndex = 0;
@@ -12,14 +21,10 @@ class Endboss extends MovableObject {
   deathFrameDuration = 200;
 
   IMAGES_WALKING = [
-    "img/4_enemie_boss_chicken/2_alert/G5.png",
-    "img/4_enemie_boss_chicken/2_alert/G6.png",
-    "img/4_enemie_boss_chicken/2_alert/G7.png",
-    "img/4_enemie_boss_chicken/2_alert/G8.png",
-    "img/4_enemie_boss_chicken/2_alert/G9.png",
-    "img/4_enemie_boss_chicken/2_alert/G10.png",
-    "img/4_enemie_boss_chicken/2_alert/G11.png",
-    "img/4_enemie_boss_chicken/2_alert/G12.png",
+    "img/4_enemie_boss_chicken/1_walk/G1.png",
+    "img/4_enemie_boss_chicken/1_walk/G2.png",
+    "img/4_enemie_boss_chicken/1_walk/G3.png",
+    "img/4_enemie_boss_chicken/1_walk/G4.png",
   ];
 
   IMAGES_HURT = [
@@ -33,8 +38,9 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/5_dead/G25.png",
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
+
   constructor() {
-    super().loadImage("img/4_enemie_boss_chicken/2_alert/G5.png");
+    super().loadImage("img/4_enemie_boss_chicken/1_walk/G1.png");
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
@@ -44,20 +50,126 @@ class Endboss extends MovableObject {
   /**
    * Starts endboss animations using game state manager
    * @param {GameStateManager} gameStateManager - The game state manager instance
+   * @param {Character} targetCharacter - The character to chase
    */
-  startAnimations(gameStateManager) {
+  startAnimations(gameStateManager, targetCharacter) {
+    this.setTarget(targetCharacter);
+
+    gameStateManager.registerInterval(() => {
+      if (this.isDead()) {
+        this.speed = 0;
+        this.isMoving = false;
+        return;
+      }
+      this.updateChaseMovement();
+    }, 1000 / 60);
+
     gameStateManager.registerInterval(() => {
       if (this.isDead()) {
         this.playDeathAnimation();
         this.speed = 0;
+        this.isMoving = false;
         return;
       }
       if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
         return;
       }
-      this.playAnimation(this.IMAGES_WALKING);
+      if (this.isMoving) {
+        this.playAnimation(this.IMAGES_WALKING);
+      }
     }, 200);
+  }
+
+  /**
+   * Sets target character for chase behavior
+   * @param {Character} character - Target character
+   */
+  setTarget(character) {
+    this.targetCharacter = character || null;
+  }
+
+  /**
+   * Sets stun duration in milliseconds
+   * @param {number} durationMs - Stun duration in ms
+   */
+  setStunDurationMs(durationMs) {
+    if (durationMs <= 0) return;
+    this.stunDurationMs = durationMs;
+  }
+
+  /**
+   * Applies or refreshes stun timer
+   */
+  applyStun() {
+    this.stunnedUntil = Date.now() + this.stunDurationMs;
+  }
+
+  /**
+   * Checks if endboss is currently stunned
+   * @returns {boolean} True when stunned
+   */
+  isStunned() {
+    return Date.now() < this.stunnedUntil;
+  }
+
+  /**
+   * Sets distance at which chase activates
+   * @param {number} distance - Activation distance in px
+   */
+  setChaseActivationDistance(distance) {
+    if (distance <= 0) return;
+    this.chaseActivationDistance = distance;
+  }
+
+  /**
+   * Returns absolute X distance to target character
+   * @returns {number} Distance in px
+   */
+  getDistanceToTarget() {
+    if (!this.targetCharacter) return Number.POSITIVE_INFINITY;
+    return Math.abs(this.targetCharacter.x - this.x);
+  }
+
+  /**
+   * Updates horizontal chase movement towards character
+   */
+  updateChaseMovement() {
+    if (!this.targetCharacter || this.isDead()) {
+      this.isMoving = false;
+      this.speed = 0;
+      return;
+    }
+    if (this.isStunned()) {
+      this.isMoving = false;
+      this.speed = 0;
+      return;
+    }
+    let deltaX = this.targetCharacter.x - this.x;
+    let distanceToTarget = this.getDistanceToTarget();
+    if (!this.chaseActivated && distanceToTarget > this.chaseActivationDistance) {
+      this.isMoving = false;
+      this.speed = 0;
+      return;
+    }
+    if (!this.chaseActivated && distanceToTarget <= this.chaseActivationDistance) {
+      this.chaseActivated = true;
+    }
+    let chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
+    if (distanceToTarget <= this.chaseStopDistance) {
+      this.isMoving = false;
+      this.speed = 0;
+      return;
+    }
+    this.speed = chaseSpeed;
+    this.isMoving = true;
+    if (deltaX < 0) {
+      this.x -= chaseSpeed;
+      this.otherDirection = false;
+      return;
+    }
+    this.x += chaseSpeed;
+    this.otherDirection = true;
   }
 
   /**

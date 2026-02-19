@@ -40,7 +40,7 @@ class World {
     // Start animations for all enemies that support it
     this.level.enemies.forEach(enemy => {
       if (typeof enemy.startAnimations === 'function') {
-        enemy.startAnimations(this.gameStateManager);
+        enemy.startAnimations(this.gameStateManager, this.character);
       }
     });
     
@@ -146,7 +146,7 @@ class World {
     } else {
       this.character.hit();
     }
-    this.statusBar.setPercentage(this.character.energy);
+    this.updateHealthBar();
   }
 
   /**
@@ -166,6 +166,7 @@ class World {
         bottleHit = true;
         
         if (enemy instanceof Endboss) {
+          enemy.applyStun();
           this.updateEndbossBar();
         }
       });
@@ -181,8 +182,9 @@ class World {
    */
   checkEndbossProximity() {
     let previousState = this.endbossNearby;
-    this.endbossNearby = this.character.x > 2200;
-    
+    let endboss = this.level.enemies.find((enemy) => enemy instanceof Endboss);
+    this.endbossNearby = !!(endboss && endboss.chaseActivated);
+
     if (this.endbossNearby && !previousState) {
       this.updateEndbossBar();
     }
@@ -197,6 +199,13 @@ class World {
       let percentage = (endboss.energy / 10) * 100;
       this.endbossBar.setPercentage(percentage);
     }
+  }
+
+  /**
+   * Updates character health status bar
+   */
+  updateHealthBar() {
+    this.statusBar.setPercentage(this.character.energy);
   }
 
   /**
@@ -350,6 +359,7 @@ class World {
     this.endbossDefeatedTime = 0;
     
     // Reset UI bars
+    this.updateHealthBar();
     this.updateCoinBar();
     this.updateBottleBar();
     this.endbossBar.setPercentage(100);

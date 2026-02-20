@@ -32,6 +32,27 @@
       <h1 class="game-title">El pollo loco</h1>
       <div class="canvas-shell">
         <canvas id="canvas" width="720" height="480"></canvas>
+        <div id="mobile-controls" class="mobile-button-container">
+          <div class="mobile-controls-group mobile-controls-left">
+            <button id="mobile-left" type="button" aria-label="Move left">
+              <img src="img/button_background_images/arrowleft.svg" alt="Move left" />
+            </button>
+            <button id="mobile-right" type="button" aria-label="Move right">
+              <img src="img/button_background_images/arrowright.svg" alt="Move right" />
+            </button>
+          </div>
+          <div class="mobile-controls-group mobile-controls-right">
+            <button id="mobile-jump" type="button" aria-label="Jump">
+              <img src="img/button_background_images/arrowup.svg" alt="Jump" />
+            </button>
+            <button id="mobile-throw" type="button" aria-label="Throw bottle">
+              <img src="img/button_background_images/throwbottle.svg" alt="Throw bottle" />
+            </button>
+          </div>
+        </div>
+        <div id="orientation-overlay" class="orientation-overlay">
+          <p>Rotate your device to landscape.</p>
+        </div>
         <div id="game-overlay" class="game-overlay hidden"></div>
       </div>
     </main>

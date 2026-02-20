@@ -348,26 +348,31 @@ class World {
     if (this.character.isDead() && this.gameStateManager.isRunning()) {
       this.gameStateManager.setState(GameStateManager.STATES.GAME_OVER);
       this.screenManager.showGameOver();
+      this.dispatchGameEnded("lose");
     }
+  }
+
+  /**
+   * Dispatches an ended event with result info
+   * @param {string} result - End result value
+   */
+  dispatchGameEnded(result) {
+    const endedEvent = new CustomEvent("gameEnded", { detail: { result } });
+    document.dispatchEvent(endedEvent);
   }
 
   /**
    * Checks if win condition is met (endboss defeated)
    */
   checkWinCondition() {
-    let endboss = this.level.enemies.find(enemy => enemy instanceof Endboss);
-    
+    let endboss = this.level.enemies.find((enemy) => enemy instanceof Endboss);
     if (!endboss || !endboss.isDead()) return;
-    if (this.endbossDefeatedTime === 0) {
-      this.endbossDefeatedTime = new Date().getTime();
-    }
-    
-    let timeSinceDefeat = (new Date().getTime() - this.endbossDefeatedTime) / 1000;
-    
-    if (timeSinceDefeat >= 3 && this.gameStateManager.isRunning()) {
-      this.gameStateManager.setState(GameStateManager.STATES.WON);
-      this.screenManager.showWinScreen();
-    }
+    if (this.endbossDefeatedTime === 0) this.endbossDefeatedTime = Date.now();
+    let timeSinceDefeat = (Date.now() - this.endbossDefeatedTime) / 1000;
+    if (timeSinceDefeat < 3 || !this.gameStateManager.isRunning()) return;
+    this.gameStateManager.setState(GameStateManager.STATES.WON);
+    this.screenManager.showWinScreen();
+    this.dispatchGameEnded("win");
   }
 
   /**

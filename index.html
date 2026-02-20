@@ -8,6 +8,7 @@
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
     <script src="models/game-state-manager.class.js"></script>
+    <script src="models/audio-manager.class.js"></script>
     <script src="models/screen-manager.class.js"></script>
     <script src="models/character.class.js"></script>
     <script src="models/chicken.class.js"></script>
@@ -32,6 +33,9 @@
       <h1 class="game-title">El pollo loco</h1>
       <div class="canvas-shell">
         <canvas id="canvas" width="720" height="480"></canvas>
+        <button id="runtime-mute" class="icon-button" type="button" aria-label="Toggle sound">
+          <img id="runtime-mute-icon" src="img/button_background_images/soundon.svg" alt="Toggle sound" />
+        </button>
         <div id="mobile-controls" class="mobile-button-container">
           <div class="mobile-controls-group mobile-controls-left">
             <button id="mobile-left" type="button" aria-label="Move left">

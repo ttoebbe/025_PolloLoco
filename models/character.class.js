@@ -67,20 +67,67 @@ class Character extends MovableObject {
    */
   startMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
-      if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.moveRight();
-        this.otherDirection = false;
-      }
-      if (this.world.keyboard.LEFT && this.x > 0) {
-        this.moveLeft();
-        this.otherDirection = true;
-      }
-      if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-        this.jump();
-      }
-
+      this.handleHorizontalMovement();
+      this.handleJumpInput();
+      this.updateWalkingSound();
       this.world.camera_x = -this.x + 100;
     }, 1000 / 60);
+  }
+
+  /**
+   * Handles left and right movement input
+   */
+  handleHorizontalMovement() {
+    this.handleMoveRight();
+    this.handleMoveLeft();
+  }
+
+  /**
+   * Moves character to the right when allowed
+   */
+  handleMoveRight() {
+    if (!this.world.keyboard.RIGHT || this.x >= this.world.level.level_end_x) return;
+    this.moveRight();
+    this.otherDirection = false;
+    this.markAudioActivity();
+  }
+
+  /**
+   * Moves character to the left when allowed
+   */
+  handleMoveLeft() {
+    if (!this.world.keyboard.LEFT || this.x <= 0) return;
+    this.moveLeft();
+    this.otherDirection = true;
+    this.markAudioActivity();
+  }
+
+  /**
+   * Handles jump input and sound
+   */
+  handleJumpInput() {
+    if (!this.world.keyboard.SPACE || this.isAboveGround()) return;
+    this.jump();
+    this.playJumpSound();
+    this.markAudioActivity();
+  }
+
+  /**
+   * Updates walking sound state
+   */
+  updateWalkingSound() {
+    const audioManager = window.audioManager;
+    if (!audioManager) return;
+    audioManager.setWalkActive(this.isMovingOnGround());
+  }
+
+  /**
+   * Checks if character moves on the ground
+   * @returns {boolean} True when walking
+   */
+  isMovingOnGround() {
+    const isMoving = this.world.keyboard.RIGHT || this.world.keyboard.LEFT;
+    return isMoving && !this.isAboveGround() && !this.isDead();
   }
 
   /**
@@ -91,15 +138,63 @@ class Character extends MovableObject {
     gameStateManager.registerInterval(() => {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
-      } else if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT);
-      } else if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
-      } else {
-        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-          this.playAnimation(this.IMAGES_WALKING);
-        }
+        this.updateIdleAudio(false);
+        return;
       }
+      if (this.isHurt()) {
+        this.playAnimation(this.IMAGES_HURT);
+        this.updateIdleAudio(false);
+        return;
+      }
+      if (this.isAboveGround()) {
+        this.playAnimation(this.IMAGES_JUMPING);
+        this.updateIdleAudio(false);
+        return;
+      }
+      this.playGroundAnimation();
+      this.updateIdleAudio(this.isIdleState());
     }, 50);
+  }
+
+  /**
+   * Plays walking animation on ground movement
+   */
+  playGroundAnimation() {
+    if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) return;
+    this.playAnimation(this.IMAGES_WALKING);
+  }
+
+  /**
+   * Checks if character is currently idle
+   * @returns {boolean} True when idle
+   */
+  isIdleState() {
+    return !this.world.keyboard.RIGHT && !this.world.keyboard.LEFT;
+  }
+
+  /**
+   * Updates idle audio state
+   * @param {boolean} isIdle - True if character is idle
+   */
+  updateIdleAudio(isIdle) {
+    const audioManager = window.audioManager;
+    if (!audioManager) return;
+    audioManager.setCharacterIdle(isIdle);
+  }
+
+  /**
+   * Plays jump sound effect
+   */
+  playJumpSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playJump();
+  }
+
+  /**
+   * Marks one gameplay activity for audio manager
+   */
+  markAudioActivity() {
+    if (!window.audioManager) return;
+    window.audioManager.markActivity();
   }
 }

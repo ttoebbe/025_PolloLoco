@@ -7,8 +7,8 @@ class ScreenManager {
    */
   constructor() {
     this.overlayContainer = null;
-    this.isMuted = false;
     this.createOverlayContainer();
+    this.setupAudioListeners();
   }
 
   /**
@@ -51,6 +51,7 @@ class ScreenManager {
     this.overlayContainer.innerHTML = this.getStartScreenTemplate();
     this.overlayContainer.classList.remove("hidden");
     this.addStartScreenListeners();
+    this.updateMuteIcons(this.getAudioMutedState());
   }
 
   /**
@@ -193,7 +194,7 @@ class ScreenManager {
    */
   addStartScreenListeners() {
     this.bindButtonClick("start-button", () => this.triggerStart());
-    this.bindButtonClick("mute", () => this.toggleMuteIcon());
+    this.bindButtonClick("mute", () => this.toggleMute());
     this.bindButtonClick("fullscreen-toggle", () => this.toggleFullscreen());
     this.bindButtonClick("controls", () => this.handlePlaceholderClick("Controls"));
     this.bindButtonClick("impressum", () => this.handlePlaceholderClick("Imprint"));
@@ -211,13 +212,64 @@ class ScreenManager {
   }
 
   /**
-   * Toggles the mute icon source
+   * Toggles global mute state
    */
-  toggleMuteIcon() {
-    this.isMuted = !this.isMuted;
+  toggleMute() {
+    if (!window.audioManager) return;
+    window.audioManager.toggleMute();
+  }
+
+  /**
+   * Registers audio mute listeners
+   */
+  setupAudioListeners() {
+    document.addEventListener("audioMuteChanged", (event) => this.handleAudioMuteChanged(event));
+  }
+
+  /**
+   * Handles mute change event
+   * @param {CustomEvent} event - Mute change event
+   */
+  handleAudioMuteChanged(event) {
+    const isMuted = event?.detail?.isMuted ?? this.getAudioMutedState();
+    this.updateMuteIcons(isMuted);
+  }
+
+  /**
+   * Returns global muted state
+   * @returns {boolean} True if muted
+   */
+  getAudioMutedState() {
+    return window.audioManager ? window.audioManager.isMuted : false;
+  }
+
+  /**
+   * Updates mute icons in UI
+   * @param {boolean} isMuted - Current mute state
+   */
+  updateMuteIcons(isMuted) {
+    this.updateStartMuteIcon(isMuted);
+    this.updateRuntimeMuteIcon(isMuted);
+  }
+
+  /**
+   * Updates startscreen mute icon
+   * @param {boolean} isMuted - Current mute state
+   */
+  updateStartMuteIcon(isMuted) {
     const muteIcon = document.getElementById("mute-icon");
     if (!muteIcon) return;
-    muteIcon.src = this.isMuted ? "img/button_background_images/mute.svg" : "img/button_background_images/soundon.svg";
+    muteIcon.src = isMuted ? "img/button_background_images/mute.svg" : "img/button_background_images/soundon.svg";
+  }
+
+  /**
+   * Updates runtime mute icon
+   * @param {boolean} isMuted - Current mute state
+   */
+  updateRuntimeMuteIcon(isMuted) {
+    const runtimeMuteIcon = document.getElementById("runtime-mute-icon");
+    if (!runtimeMuteIcon) return;
+    runtimeMuteIcon.src = isMuted ? "img/button_background_images/mute.svg" : "img/button_background_images/soundon.svg";
   }
 
   /**

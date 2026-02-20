@@ -18,6 +18,8 @@ class World {
   gameStateManager = new GameStateManager();
   screenManager = new ScreenManager();
   endbossDefeatedTime = 0;
+  throwCooldownMs = 500;
+  lastThrowTime = 0;
 
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
@@ -68,12 +70,30 @@ class World {
    */
   checkThrowableObject() {
     if (!this.keyboard.D) return;
-    if (this.collectedBottles <= 0) {
+    this.markAudioActivity();
+    if (!this.canThrowBottle()) {
       this.keyboard.D = false;
       return;
     }
     this.throwBottle();
     this.keyboard.D = false;
+  }
+
+  /**
+   * Checks if a bottle throw is currently allowed
+   * @returns {boolean} True when throw is allowed
+   */
+  canThrowBottle() {
+    if (this.collectedBottles <= 0) return false;
+    return !this.isThrowCooldownActive();
+  }
+
+  /**
+   * Checks if throw cooldown is still active
+   * @returns {boolean} True while throw is blocked
+   */
+  isThrowCooldownActive() {
+    return Date.now() - this.lastThrowTime < this.throwCooldownMs;
   }
 
   /**
@@ -88,8 +108,10 @@ class World {
       isThrownLeft,
     );
     this.throwableObjects.push(bottle);
+    this.lastThrowTime = Date.now();
     this.collectedBottles = Math.max(0, this.collectedBottles - 1);
     this.updateBottleBar();
+    this.playThrowSound();
   }
 
   checkCollisions() {
@@ -118,6 +140,7 @@ class World {
       this.level.coins.splice(i, 1);
       this.collectedCoins++;
       this.updateCoinBar();
+      this.playCoinCollectSound();
     }
   }
 
@@ -127,6 +150,7 @@ class World {
       this.level.bottles.splice(i, 1);
       this.collectedBottles++;
       this.updateBottleBar();
+      this.playBottleCollectSound();
     }
   }
 
@@ -157,6 +181,7 @@ class World {
       this.character.hit();
     }
     this.updateHealthBar();
+    this.playCharacterHurtSound();
   }
 
   /**
@@ -202,6 +227,7 @@ class World {
    */
   handleBottleEnemyHit(enemy) {
     enemy.hit();
+    this.playBottleBreakSound();
     
     if (enemy instanceof Endboss) {
       enemy.applyStun();
@@ -346,10 +372,67 @@ class World {
    */
   checkGameOver() {
     if (this.character.isDead() && this.gameStateManager.isRunning()) {
+      this.playCharacterDeadSound();
       this.gameStateManager.setState(GameStateManager.STATES.GAME_OVER);
       this.screenManager.showGameOver();
       this.dispatchGameEnded("lose");
     }
+  }
+
+  /**
+   * Plays throw sound effect
+   */
+  playThrowSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playThrow();
+  }
+
+  /**
+   * Plays coin collect sound effect
+   */
+  playCoinCollectSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playCoinCollect();
+  }
+
+  /**
+   * Plays bottle collect sound effect
+   */
+  playBottleCollectSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playBottleCollect();
+  }
+
+  /**
+   * Plays bottle break sound effect
+   */
+  playBottleBreakSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playBottleBreak();
+  }
+
+  /**
+   * Plays character hurt sound effect
+   */
+  playCharacterHurtSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playCharacterHurt();
+  }
+
+  /**
+   * Plays character dead sound effect
+   */
+  playCharacterDeadSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playCharacterDead();
+  }
+
+  /**
+   * Marks one gameplay activity for audio manager
+   */
+  markAudioActivity() {
+    if (!window.audioManager) return;
+    window.audioManager.markActivity();
   }
 
   /**
@@ -402,6 +485,7 @@ class World {
     this.level = createLevel1();
     this.camera_x = 0;
     this.throwableObjects = [];
+    this.lastThrowTime = 0;
     this.collectedCoins = 0;
     this.collectedBottles = 0;
     this.totalCoins = this.level.coins.length;

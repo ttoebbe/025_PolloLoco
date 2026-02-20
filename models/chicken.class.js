@@ -66,7 +66,17 @@ class Chicken extends MovableObject {
    * Chicken dies instantly when hit
    */
   hit() {
+    if (this.isDead()) return;
     this.energy = 0;
     this.deathTime = new Date().getTime();
+    this.playDeathSound();
+  }
+
+  /**
+   * Plays chicken death sound
+   */
+  playDeathSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playChickenDead();
   }
 }

@@ -242,9 +242,34 @@ class Endboss extends MovableObject {
     this.lastHit = Date.now();
     if (this.energy <= 0) {
       this.energy = 0;
-      if (this.deathTime === 0) {
-        this.deathTime = Date.now();
-      }
+      this.setDeathTimestamp();
+      this.playDeadSound();
+      return;
     }
+    this.playHurtSound();
+  }
+
+  /**
+   * Sets death timestamp once
+   */
+  setDeathTimestamp() {
+    if (this.deathTime !== 0) return;
+    this.deathTime = Date.now();
+  }
+
+  /**
+   * Plays endboss hurt sound
+   */
+  playHurtSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playEndbossHurt();
+  }
+
+  /**
+   * Plays endboss death sound
+   */
+  playDeadSound() {
+    if (!window.audioManager) return;
+    window.audioManager.playEndbossDead();
   }
 }

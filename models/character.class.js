@@ -135,25 +135,51 @@ class Character extends MovableObject {
    * @param {GameStateManager} gameStateManager - The game state manager instance
    */
   startAnimationLoop(gameStateManager) {
-    gameStateManager.registerInterval(() => {
-      if (this.isDead()) {
-        this.playAnimation(this.IMAGES_DEAD);
-        this.updateIdleAudio(false);
-        return;
-      }
-      if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT);
-        this.updateIdleAudio(false);
-        return;
-      }
-      if (this.isAboveGround()) {
-        this.playAnimation(this.IMAGES_JUMPING);
-        this.updateIdleAudio(false);
-        return;
-      }
-      this.playGroundAnimation();
-      this.updateIdleAudio(this.isIdleState());
-    }, 50);
+    gameStateManager.registerInterval(() => this.animateCharacter(), 50);
+  }
+
+  /**
+   * Handles the full animation state machine
+   */
+  animateCharacter() {
+    if (this.handleDeadAnimation()) return;
+    if (this.handleHurtAnimation()) return;
+    if (this.handleJumpAnimation()) return;
+    this.playGroundAnimation();
+    this.updateIdleAudio(this.isIdleState());
+  }
+
+  /**
+   * Plays dead animation when character is dead
+   * @returns {boolean} True when handled
+   */
+  handleDeadAnimation() {
+    if (!this.isDead()) return false;
+    this.playAnimation(this.IMAGES_DEAD);
+    this.updateIdleAudio(false);
+    return true;
+  }
+
+  /**
+   * Plays hurt animation when character is hurt
+   * @returns {boolean} True when handled
+   */
+  handleHurtAnimation() {
+    if (!this.isHurt()) return false;
+    this.playAnimation(this.IMAGES_HURT);
+    this.updateIdleAudio(false);
+    return true;
+  }
+
+  /**
+   * Plays jump animation while character is airborne
+   * @returns {boolean} True when handled
+   */
+  handleJumpAnimation() {
+    if (!this.isAboveGround()) return false;
+    this.playAnimation(this.IMAGES_JUMPING);
+    this.updateIdleAudio(false);
+    return true;
   }
 
   /**

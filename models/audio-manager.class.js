@@ -6,6 +6,19 @@ class AudioManager {
    * Creates a new audio manager instance.
    */
   constructor() {
+    this.initializeState();
+    this.initializeDelays();
+    this.sounds = {};
+    this.registerAllSounds();
+    this.applyMutedState();
+    this.setupAutoplayFallback();
+    this.startIdleMonitor();
+  }
+
+  /**
+   * Initializes runtime state values.
+   */
+  initializeState() {
     this.isMuted = false;
     this.lastPlayTimes = {};
     this.lastActivityTime = Date.now();
@@ -13,14 +26,16 @@ class AudioManager {
     this.walkIntervalId = null;
     this.idleIntervalId = null;
     this.backgroundMusicStarted = false;
+    this.autoplayUnlockHandler = null;
+  }
+
+  /**
+   * Initializes timing defaults.
+   */
+  initializeDelays() {
     this.walkLoopDelayMs = 140;
     this.idleDelayMs = 5000;
     this.idleCheckDelayMs = 250;
-    this.sounds = {};
-    this.registerAllSounds();
-    this.applyMutedState();
-    this.setupAutoplayFallback();
-    this.startIdleMonitor();
   }
 
   /**

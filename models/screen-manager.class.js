@@ -18,12 +18,15 @@ class ScreenManager {
   createOverlayContainer() {
     const existingOverlay = document.getElementById("game-overlay");
     if (existingOverlay) {
+      existingOverlay.classList.add("notranslate");
+      existingOverlay.setAttribute("translate", "no");
       this.overlayContainer = existingOverlay;
       return;
     }
     this.overlayContainer = document.createElement("div");
     this.overlayContainer.id = "game-overlay";
-    this.overlayContainer.className = "game-overlay hidden";
+    this.overlayContainer.className = "game-overlay hidden notranslate";
+    this.overlayContainer.setAttribute("translate", "no");
     document.body.appendChild(this.overlayContainer);
   }
 

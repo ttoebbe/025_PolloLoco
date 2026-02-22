@@ -4,6 +4,7 @@
     --page-padding: 24px;
     --ui-space: 170px;
     --canvas-max-width: 720px;
+    --startscreen-button-height: 46px;
 }
 
 html,
@@ -151,16 +152,25 @@ canvas {
     transform: scale(0.95);
 }
 
-.startscreen {
+.screen-content.startscreen {
     position: relative;
-    max-width: 720px;
+    padding: 0;
+    gap: 0;
+    max-width: none;
     width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-.startscreen-image {
-    max-width: 520px;
+.screen-content.startscreen .startscreen-image {
+    display: block;
     width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
     margin: 0;
+    object-fit: cover;
+    object-position: center;
 }
 
 .button-container {
@@ -177,6 +187,14 @@ canvas {
     max-width: calc(100% - 20px);
     justify-content: flex-end;
     flex-wrap: wrap;
+}
+
+.top-right-buttons button {
+    height: var(--startscreen-button-height);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button-container button {
@@ -319,6 +337,7 @@ body[data-game-state="running"] #runtime-mute {
     :root {
         --page-padding: 14px;
         --ui-space: 130px;
+        --startscreen-button-height: 40px;
     }
 
     body {

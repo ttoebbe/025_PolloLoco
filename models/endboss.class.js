@@ -12,7 +12,7 @@ class Endboss extends MovableObject {
   chaseActivated = false;
   chaseActivationDistance = 600;
   baseSpeedFactor = 0.3;
-  chaseStopDistance = 4;
+  chaseStopDistance = -3;
   isDying = false;
   deathTime = 0;
   deathAnimationIndex = 0;
@@ -132,6 +132,27 @@ class Endboss extends MovableObject {
   }
 
   /**
+   * Returns horizontal gap between endboss and target collision bounds
+   * > 0 means separated, 0 means touching, < 0 means overlap
+   * @returns {number} Horizontal gap in pixels
+   */
+  getHorizontalGapToTargetBounds() {
+    if (!this.targetCharacter) return Number.POSITIVE_INFINITY;
+    const selfBounds = this.getCollisionBounds();
+    const targetBounds = this.targetCharacter.getCollisionBounds();
+
+    if (selfBounds.right <= targetBounds.left) {
+      return targetBounds.left - selfBounds.right;
+    }
+    if (targetBounds.right <= selfBounds.left) {
+      return selfBounds.left - targetBounds.right;
+    }
+
+    const overlap = Math.min(selfBounds.right, targetBounds.right) - Math.max(selfBounds.left, targetBounds.left);
+    return -overlap;
+  }
+
+  /**
    * Updates horizontal chase movement towards character
    */
   updateChaseMovement() {
@@ -170,8 +191,9 @@ class Endboss extends MovableObject {
     if (!this.chaseActivated && distanceToTarget <= this.chaseActivationDistance) {
       this.chaseActivated = true;
     }
-    
-    return distanceToTarget > this.chaseStopDistance;
+
+    const horizontalGap = this.getHorizontalGapToTargetBounds();
+    return horizontalGap > this.chaseStopDistance;
   }
 
   /**
@@ -186,17 +208,29 @@ class Endboss extends MovableObject {
    * Executes chase movement towards target
    */
   executeChaseMovement() {
-    let deltaX = this.targetCharacter.x - this.x;
-    let chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
-    
+    const selfBounds = this.getCollisionBounds();
+    const targetBounds = this.targetCharacter.getCollisionBounds();
+    const selfCenterX = (selfBounds.left + selfBounds.right) / 2;
+    const targetCenterX = (targetBounds.left + targetBounds.right) / 2;
+    const direction = Math.sign(targetCenterX - selfCenterX);
+    const chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
+    const horizontalGap = this.getHorizontalGapToTargetBounds();
+    const remainingDistance = Math.max(0, horizontalGap - this.chaseStopDistance);
+    const step = Math.min(chaseSpeed, remainingDistance);
+
+    if (direction === 0 || step === 0) {
+      this.stopMovement();
+      return;
+    }
+
     this.speed = chaseSpeed;
     this.isMoving = true;
-    
-    if (deltaX < 0) {
-      this.x -= chaseSpeed;
+
+    if (direction < 0) {
+      this.x -= step;
       this.otherDirection = false;
     } else {
-      this.x += chaseSpeed;
+      this.x += step;
       this.otherDirection = true;
     }
   }

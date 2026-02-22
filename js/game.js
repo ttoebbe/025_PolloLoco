@@ -13,6 +13,7 @@ function init() {
   setGameUiState("start");
   bindMobileControls();
   bindRuntimeMuteButton();
+  bindRuntimePauseButton();
   screenManager.showStartScreen();
 }
 
@@ -79,6 +80,14 @@ function bindRuntimeMuteButton() {
   syncRuntimeMuteIcon();
 }
 
+function bindRuntimePauseButton() {
+  const button = document.getElementById("runtime-pause");
+  if (!button) return;
+  button.addEventListener("click", () => togglePause());
+  button.textContent = "Pause";
+  button.setAttribute("aria-pressed", "false");
+}
+
 function toggleAudioMute() {
   if (!window.audioManager) return;
   window.audioManager.toggleMute();
@@ -97,15 +106,48 @@ function markAudioActivity() {
   window.audioManager.markActivity();
 }
 
+function togglePause() {
+  if (!world?.gameStateManager) return;
+  const gameState = world.gameStateManager;
+  if (gameState.isRunning()) {
+    gameState.setState(GameStateManager.STATES.PAUSED);
+    setPauseUi(true);
+    resetKeyboardState();
+    window.audioManager?.hardStopAll();
+    return;
+  }
+  if (!gameState.isPaused()) return;
+  gameState.setState(GameStateManager.STATES.RUNNING);
+  setPauseUi(false);
+  window.audioManager?.startBackgroundMusic();
+}
+
+function setPauseUi(isPaused) {
+  const pauseButton = document.getElementById("runtime-pause");
+  if (!pauseButton) return;
+  pauseButton.textContent = isPaused ? "Resume" : "Pause";
+  pauseButton.setAttribute("aria-pressed", `${isPaused}`);
+  setGameUiState(isPaused ? "paused" : "running");
+}
+
+function resetKeyboardState() {
+  keyboard.LEFT = false;
+  keyboard.RIGHT = false;
+  keyboard.UP = false;
+  keyboard.DOWN = false;
+  keyboard.SPACE = false;
+  keyboard.D = false;
+}
+
 document.addEventListener("gameStart", () => {
   startGame();
-  setGameUiState("running");
+  setPauseUi(false);
   window.audioManager?.startBackgroundMusic();
 });
 
 document.addEventListener("gameRestart", () => {
   window.audioManager?.hardStopAll();
-  setGameUiState("running");
+  setPauseUi(false);
   window.audioManager?.startBackgroundMusic();
 });
 

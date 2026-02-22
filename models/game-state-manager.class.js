@@ -4,6 +4,7 @@
 class GameStateManager {
     static STATES = {
         RUNNING: 'RUNNING',
+        PAUSED: 'PAUSED',
         GAME_OVER: 'GAME_OVER', 
         WON: 'WON'
     };
@@ -100,6 +101,14 @@ class GameStateManager {
      */
     isRunning() {
         return this.currentState === GameStateManager.STATES.RUNNING;
+    }
+
+    /**
+     * Checks if game is currently paused
+     * @returns {boolean} True if game is paused
+     */
+    isPaused() {
+        return this.currentState === GameStateManager.STATES.PAUSED;
     }
 
     /**

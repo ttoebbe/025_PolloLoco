@@ -33,9 +33,12 @@
       <h1 class="game-title">El pollo loco</h1>
       <div class="canvas-shell">
         <canvas id="canvas" width="720" height="480"></canvas>
-        <button id="runtime-mute" class="icon-button" type="button" aria-label="Toggle sound">
-          <img id="runtime-mute-icon" src="img/button_background_images/soundon.svg" alt="Toggle sound" />
-        </button>
+        <div id="runtime-controls">
+          <button id="runtime-mute" class="icon-button" type="button" aria-label="Toggle sound">
+            <img id="runtime-mute-icon" src="img/button_background_images/soundon.svg" alt="Toggle sound" />
+          </button>
+          <button id="runtime-pause" type="button" aria-label="Toggle pause" aria-pressed="false">Pause</button>
+        </div>
         <div id="mobile-controls" class="mobile-button-container">
           <div class="mobile-controls-group mobile-controls-left">
             <button id="mobile-left" type="button" aria-label="Move left">

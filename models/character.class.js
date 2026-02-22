@@ -40,6 +40,19 @@ class Character extends MovableObject {
     "img/2_character_pepe/4_hurt/H-43.png",
   ];
 
+  IMAGES_LONG_IDLE = [
+    "img/2_character_pepe/1_idle/long_idle/I-11.png",
+    "img/2_character_pepe/1_idle/long_idle/I-12.png",
+    "img/2_character_pepe/1_idle/long_idle/I-13.png",
+    "img/2_character_pepe/1_idle/long_idle/I-14.png",
+    "img/2_character_pepe/1_idle/long_idle/I-15.png",
+    "img/2_character_pepe/1_idle/long_idle/I-16.png",
+    "img/2_character_pepe/1_idle/long_idle/I-17.png",
+    "img/2_character_pepe/1_idle/long_idle/I-18.png",
+    "img/2_character_pepe/1_idle/long_idle/I-19.png",
+    "img/2_character_pepe/1_idle/long_idle/I-20.png",
+  ];
+
   world;
   //   currentImageIndex = 0;
 
@@ -49,6 +62,7 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_LONG_IDLE);
   }
 
   /**
@@ -145,6 +159,7 @@ class Character extends MovableObject {
     if (this.handleDeadAnimation()) return;
     if (this.handleHurtAnimation()) return;
     if (this.handleJumpAnimation()) return;
+    if (this.handleLongIdleAnimation()) return;
     this.playGroundAnimation();
     this.updateIdleAudio(this.isIdleState());
   }
@@ -179,6 +194,19 @@ class Character extends MovableObject {
     if (!this.isAboveGround()) return false;
     this.playAnimation(this.IMAGES_JUMPING);
     this.updateIdleAudio(false);
+    return true;
+  }
+
+  /**
+   * Plays long idle animation when idle delay has elapsed
+   * @returns {boolean} True when handled
+   */
+  handleLongIdleAnimation() {
+    if (this.isAboveGround() || !this.isIdleState()) return false;
+    const audioManager = window.audioManager;
+    if (!audioManager?.isLongIdleActive?.()) return false;
+    this.playAnimation(this.IMAGES_LONG_IDLE);
+    this.updateIdleAudio(true);
     return true;
   }
 

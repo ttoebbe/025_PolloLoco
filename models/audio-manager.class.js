@@ -261,6 +261,14 @@ class AudioManager {
   }
 
   /**
+   * Returns whether character is currently in long-idle state.
+   * @returns {boolean} True when idle delay elapsed while character is idle.
+   */
+  isLongIdleActive() {
+    return this.isCharacterIdle && this.hasReachedIdleDelay();
+  }
+
+  /**
    * Enables or disables walking loop sound.
    * @param {boolean} isActive - True while character is moving.
    */

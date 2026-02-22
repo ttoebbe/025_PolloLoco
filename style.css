@@ -130,28 +130,6 @@ canvas {
     font-family: Arial, sans-serif;
 }
 
-.restart-button {
-    display: block;
-    background-color: #ff6b35;
-    color: white;
-    border: none;
-    padding: clamp(10px, 2.4vw, 15px) clamp(18px, 4vw, 30px);
-    font-size: clamp(16px, 2.8vw, 20px);
-    border-radius: 10px;
-    cursor: pointer;
-    margin: 20px auto 0;
-    font-family: Arial, sans-serif;
-}
-
-.restart-button:hover {
-    background-color: #e55a2b;
-    transform: scale(1.05);
-}
-
-.restart-button:active {
-    transform: scale(0.95);
-}
-
 .screen-content.startscreen {
     position: relative;
     padding: 0;

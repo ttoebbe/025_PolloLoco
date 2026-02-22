@@ -101,7 +101,7 @@ class ScreenManager {
     return `
       <div class="screen-content">
         <img src="img/You won, you lost/You Won B.png" alt="You Won" class="screen-image">
-        <button id="restart-button" class="restart-button">Play Again</button>
+        <button id="restart-button" class="game-over-restart-button">Play Again</button>
       </div>
     `;
   }

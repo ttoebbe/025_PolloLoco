@@ -7,6 +7,7 @@ class ScreenManager {
    */
   constructor() {
     this.overlayContainer = null;
+    this.gameOverKeyHandler = null;
     this.createOverlayContainer();
     this.setupAudioListeners();
   }
@@ -58,6 +59,7 @@ class ScreenManager {
    * Hides all overlay screens
    */
   hideScreens() {
+    this.removeGameOverListeners();
     this.overlayContainer.classList.add("hidden");
     this.overlayContainer.innerHTML = "";
   }
@@ -70,9 +72,25 @@ class ScreenManager {
     return `
       <div class="screen-content game-over-screen">
         <img src="img/9_intro_outro_screens/game_over/game over.png" alt="Game Over" class="screen-image game-over-image">
-        <div class="screen-text game-over-hint">Press any key to restart</div>
+        ${this.getGameOverActionsTemplate()}
       </div>
     `;
+  }
+
+  /**
+   * Returns game over action area template
+   * @returns {string} HTML template string
+   */
+  getGameOverActionsTemplate() {
+    return `<div class="game-over-actions">${this.getGameOverRestartButtonTemplate()}</div>`;
+  }
+
+  /**
+   * Returns game over restart button template
+   * @returns {string} HTML template string
+   */
+  getGameOverRestartButtonTemplate() {
+    return `<button id="game-over-restart-button" class="game-over-restart-button" type="button">Restart</button>`;
   }
 
   /**
@@ -185,11 +203,33 @@ class ScreenManager {
    * Adds event listeners for game over screen
    */
   addGameOverListeners() {
-    const handleKeyPress = () => {
-      document.removeEventListener("keydown", handleKeyPress);
-      this.triggerRestart();
-    };
-    document.addEventListener("keydown", handleKeyPress);
+    this.bindGameOverButton();
+    this.bindGameOverKey();
+  }
+
+  /**
+   * Binds game over restart button click
+   */
+  bindGameOverButton() {
+    this.bindButtonClick("game-over-restart-button", () => this.triggerRestart());
+  }
+
+  /**
+   * Binds game over keyboard restart
+   */
+  bindGameOverKey() {
+    this.removeGameOverListeners();
+    this.gameOverKeyHandler = () => this.triggerRestart();
+    document.addEventListener("keydown", this.gameOverKeyHandler);
+  }
+
+  /**
+   * Removes game over keyboard restart listener
+   */
+  removeGameOverListeners() {
+    if (!this.gameOverKeyHandler) return;
+    document.removeEventListener("keydown", this.gameOverKeyHandler);
+    this.gameOverKeyHandler = null;
   }
 
   /**
@@ -337,6 +377,7 @@ class ScreenManager {
    * Triggers game restart event
    */
   triggerRestart() {
+    this.removeGameOverListeners();
     const restartEvent = new CustomEvent("gameRestart");
     document.dispatchEvent(restartEvent);
   }

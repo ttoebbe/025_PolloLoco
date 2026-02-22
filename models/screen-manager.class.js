@@ -68,9 +68,9 @@ class ScreenManager {
    */
   getGameOverTemplate() {
     return `
-      <div class="screen-content">
-        <img src="img/9_intro_outro_screens/game_over/game over.png" alt="Game Over" class="screen-image">
-        <div class="screen-text">Press any key to restart</div>
+      <div class="screen-content game-over-screen">
+        <img src="img/9_intro_outro_screens/game_over/game over.png" alt="Game Over" class="screen-image game-over-image">
+        <div class="screen-text game-over-hint">Press any key to restart</div>
       </div>
     `;
   }

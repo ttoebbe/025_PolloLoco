@@ -173,6 +173,43 @@ canvas {
     object-position: center;
 }
 
+.screen-content.game-over-screen {
+    position: relative;
+    padding: 0;
+    gap: 0;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+}
+
+.screen-content.game-over-screen .game-over-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    object-fit: cover;
+    object-position: center;
+}
+
+.screen-content.game-over-screen .game-over-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 1;
+    color: #fff4d3;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
 .button-container {
     display: flex;
     gap: 10px;

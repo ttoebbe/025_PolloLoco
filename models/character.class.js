@@ -84,7 +84,7 @@ class Character extends MovableObject {
       this.handleHorizontalMovement();
       this.handleJumpInput();
       this.updateWalkingSound();
-      this.world.camera_x = -this.x + 100;
+      this.world.cameraX = -this.x + 100;
     }, 1000 / 60);
   }
 
@@ -100,7 +100,7 @@ class Character extends MovableObject {
    * Moves character to the right when allowed
    */
   handleMoveRight() {
-    if (!this.world.keyboard.RIGHT || this.x >= this.world.level.level_end_x) return;
+    if (!this.world.keyboard.right || this.x >= this.world.level.levelEndX) return;
     this.moveRight();
     this.otherDirection = false;
     this.markAudioActivity();
@@ -110,7 +110,7 @@ class Character extends MovableObject {
    * Moves character to the left when allowed
    */
   handleMoveLeft() {
-    if (!this.world.keyboard.LEFT || this.x <= 0) return;
+    if (!this.world.keyboard.left || this.x <= 0) return;
     this.moveLeft();
     this.otherDirection = true;
     this.markAudioActivity();
@@ -120,7 +120,7 @@ class Character extends MovableObject {
    * Handles jump input and sound
    */
   handleJumpInput() {
-    if (!this.world.keyboard.SPACE || this.isAboveGround()) return;
+    if (!this.world.keyboard.space || this.isAboveGround()) return;
     this.jump();
     this.playJumpSound();
     this.markAudioActivity();
@@ -140,7 +140,7 @@ class Character extends MovableObject {
    * @returns {boolean} True when walking
    */
   isMovingOnGround() {
-    const isMoving = this.world.keyboard.RIGHT || this.world.keyboard.LEFT;
+    const isMoving = this.world.keyboard.right || this.world.keyboard.left;
     return isMoving && !this.isAboveGround() && !this.isDead();
   }
 
@@ -214,7 +214,7 @@ class Character extends MovableObject {
    * Plays walking animation on ground movement
    */
   playGroundAnimation() {
-    if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) return;
+    if (!this.world.keyboard.right && !this.world.keyboard.left) return;
     this.playAnimation(this.IMAGES_WALKING);
   }
 
@@ -223,7 +223,7 @@ class Character extends MovableObject {
    * @returns {boolean} True when idle
    */
   isIdleState() {
-    return !this.world.keyboard.RIGHT && !this.world.keyboard.LEFT;
+    return !this.world.keyboard.right && !this.world.keyboard.left;
   }
 
   /**

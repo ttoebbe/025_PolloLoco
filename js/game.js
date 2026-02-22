@@ -27,10 +27,10 @@ function setGameUiState(state) {
 }
 
 function bindMobileControls() {
-  bindPointerControl("mobile-left", "LEFT");
-  bindPointerControl("mobile-right", "RIGHT");
-  bindPointerControl("mobile-jump", "SPACE");
-  bindPointerControl("mobile-throw", "D");
+  bindPointerControl("mobile-left", "left");
+  bindPointerControl("mobile-right", "right");
+  bindPointerControl("mobile-jump", "space");
+  bindPointerControl("mobile-throw", "d");
 }
 
 function bindPointerControl(buttonId, keyName) {
@@ -50,10 +50,10 @@ function setPointerState(event, keyName, isPressed) {
 
 function setArrowKeyState(eventKey, isPressed) {
   if (isPressed) markAudioActivity();
-  if (eventKey === "ArrowRight") keyboard.RIGHT = isPressed;
-  if (eventKey === "ArrowLeft") keyboard.LEFT = isPressed;
-  if (eventKey === "ArrowUp") keyboard.UP = isPressed;
-  if (eventKey === "ArrowDown") keyboard.DOWN = isPressed;
+  if (eventKey === "ArrowRight") keyboard.right = isPressed;
+  if (eventKey === "ArrowLeft") keyboard.left = isPressed;
+  if (eventKey === "ArrowUp") keyboard.up = isPressed;
+  if (eventKey === "ArrowDown") keyboard.down = isPressed;
 }
 
 function handleKeyDown(event) {
@@ -61,15 +61,15 @@ function handleKeyDown(event) {
   setArrowKeyState(event.key, true);
   if (event.key === " ") {
     event.preventDefault();
-    keyboard.SPACE = true;
+    keyboard.space = true;
   }
-  if (event.key.toLowerCase() === "d") keyboard.D = true;
+  if (event.key.toLowerCase() === "d") keyboard.d = true;
 }
 
 function handleKeyUp(event) {
   setArrowKeyState(event.key, false);
-  if (event.key === " ") keyboard.SPACE = false;
-  if (event.key.toLowerCase() === "d") keyboard.D = false;
+  if (event.key === " ") keyboard.space = false;
+  if (event.key.toLowerCase() === "d") keyboard.d = false;
 }
 
 function bindRuntimeMuteButton() {
@@ -110,13 +110,21 @@ function togglePause() {
   if (!world?.gameStateManager) return;
   const gameState = world.gameStateManager;
   if (gameState.isRunning()) {
-    gameState.setState(GameStateManager.STATES.PAUSED);
-    setPauseUi(true);
-    resetKeyboardState();
-    window.audioManager?.hardStopAll();
+    pauseGame(gameState);
     return;
   }
   if (!gameState.isPaused()) return;
+  resumeGame(gameState);
+}
+
+function pauseGame(gameState) {
+  gameState.setState(GameStateManager.STATES.PAUSED);
+  setPauseUi(true);
+  resetKeyboardState();
+  window.audioManager?.hardStopAll();
+}
+
+function resumeGame(gameState) {
   gameState.setState(GameStateManager.STATES.RUNNING);
   setPauseUi(false);
   window.audioManager?.startBackgroundMusic();
@@ -131,12 +139,12 @@ function setPauseUi(isPaused) {
 }
 
 function resetKeyboardState() {
-  keyboard.LEFT = false;
-  keyboard.RIGHT = false;
-  keyboard.UP = false;
-  keyboard.DOWN = false;
-  keyboard.SPACE = false;
-  keyboard.D = false;
+  keyboard.left = false;
+  keyboard.right = false;
+  keyboard.up = false;
+  keyboard.down = false;
+  keyboard.space = false;
+  keyboard.d = false;
 }
 
 document.addEventListener("gameStart", () => {

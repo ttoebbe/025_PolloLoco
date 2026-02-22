@@ -54,31 +54,30 @@ class Endboss extends MovableObject {
    */
   startAnimations(gameStateManager, targetCharacter) {
     this.setTarget(targetCharacter);
+    this.registerMovementLoop(gameStateManager);
+    this.registerAnimationLoop(gameStateManager);
+  }
 
+  registerMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
-      if (this.isDead()) {
-        this.speed = 0;
-        this.isMoving = false;
-        return;
-      }
-      this.updateChaseMovement();
+      if (!this.isDead()) return this.updateChaseMovement();
+      this.stopMovement();
     }, 1000 / 60);
+  }
 
-    gameStateManager.registerInterval(() => {
-      if (this.isDead()) {
-        this.playDeathAnimation();
-        this.speed = 0;
-        this.isMoving = false;
-        return;
-      }
-      if (this.isHurt()) {
-        this.playAnimation(this.IMAGES_HURT);
-        return;
-      }
-      if (this.isMoving) {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
-    }, 200);
+  registerAnimationLoop(gameStateManager) {
+    gameStateManager.registerInterval(() => this.updateAnimationFrame(), 200);
+  }
+
+  updateAnimationFrame() {
+    if (this.isDead()) return this.playDeathFrame();
+    if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
+    if (this.isMoving) this.playAnimation(this.IMAGES_WALKING);
+  }
+
+  playDeathFrame() {
+    this.playDeathAnimation();
+    this.stopMovement();
   }
 
   /**
@@ -140,14 +139,8 @@ class Endboss extends MovableObject {
     if (!this.targetCharacter) return Number.POSITIVE_INFINITY;
     const selfBounds = this.getCollisionBounds();
     const targetBounds = this.targetCharacter.getCollisionBounds();
-
-    if (selfBounds.right <= targetBounds.left) {
-      return targetBounds.left - selfBounds.right;
-    }
-    if (targetBounds.right <= selfBounds.left) {
-      return selfBounds.left - targetBounds.right;
-    }
-
+    if (selfBounds.right <= targetBounds.left) return targetBounds.left - selfBounds.right;
+    if (targetBounds.right <= selfBounds.left) return selfBounds.left - targetBounds.right;
     const overlap = Math.min(selfBounds.right, targetBounds.right) - Math.max(selfBounds.left, targetBounds.left);
     return -overlap;
   }
@@ -208,57 +201,77 @@ class Endboss extends MovableObject {
    * Executes chase movement towards target
    */
   executeChaseMovement() {
+    const direction = this.getChaseDirection();
+    const chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
+    const step = this.getChaseStep(chaseSpeed);
+    if (direction === 0 || step === 0) return this.stopMovement();
+    this.speed = chaseSpeed;
+    this.isMoving = true;
+    this.moveInDirection(direction, step);
+  }
+
+  getChaseDirection() {
     const selfBounds = this.getCollisionBounds();
     const targetBounds = this.targetCharacter.getCollisionBounds();
     const selfCenterX = (selfBounds.left + selfBounds.right) / 2;
     const targetCenterX = (targetBounds.left + targetBounds.right) / 2;
-    const direction = Math.sign(targetCenterX - selfCenterX);
-    const chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
+    return Math.sign(targetCenterX - selfCenterX);
+  }
+
+  getChaseStep(chaseSpeed) {
     const horizontalGap = this.getHorizontalGapToTargetBounds();
     const remainingDistance = Math.max(0, horizontalGap - this.chaseStopDistance);
-    const step = Math.min(chaseSpeed, remainingDistance);
+    return Math.min(chaseSpeed, remainingDistance);
+  }
 
-    if (direction === 0 || step === 0) {
-      this.stopMovement();
-      return;
-    }
+  moveInDirection(direction, step) {
+    if (direction < 0) return this.moveLeftStep(step);
+    this.moveRightStep(step);
+  }
 
-    this.speed = chaseSpeed;
-    this.isMoving = true;
+  moveLeftStep(step) {
+    this.x -= step;
+    this.otherDirection = false;
+  }
 
-    if (direction < 0) {
-      this.x -= step;
-      this.otherDirection = false;
-    } else {
-      this.x += step;
-      this.otherDirection = true;
-    }
+  moveRightStep(step) {
+    this.x += step;
+    this.otherDirection = true;
   }
 
   /**
    * Plays death animation until last frame and keeps it there
    */
   playDeathAnimation() {
-    let now = Date.now();
-    if (!this.isDying) {
-      this.isDying = true;
-      this.deathAnimationIndex = 0;
-      this.deathAnimationFinished = false;
-      this.lastDeathFrameTime = now;
-      this.setDeathFrame();
-      return;
-    }
-    if (this.deathAnimationFinished) {
-      this.setDeathFrame(this.IMAGES_DEAD.length - 1);
-      return;
-    }
-    if (now - this.lastDeathFrameTime < this.deathFrameDuration) return;
+    const now = Date.now();
+    if (!this.isDying) return this.startDeathAnimation(now);
+    if (this.deathAnimationFinished) return this.setDeathFrame(this.IMAGES_DEAD.length - 1);
+    if (!this.isNextDeathFrameReady(now)) return;
+    this.advanceDeathAnimation(now);
+  }
+
+  startDeathAnimation(now) {
+    this.isDying = true;
+    this.deathAnimationIndex = 0;
+    this.deathAnimationFinished = false;
+    this.lastDeathFrameTime = now;
+    this.setDeathFrame();
+  }
+
+  isNextDeathFrameReady(now) {
+    return now - this.lastDeathFrameTime >= this.deathFrameDuration;
+  }
+
+  advanceDeathAnimation(now) {
     this.lastDeathFrameTime = now;
     this.deathAnimationIndex++;
-    if (this.deathAnimationIndex >= this.IMAGES_DEAD.length - 1) {
-      this.deathAnimationIndex = this.IMAGES_DEAD.length - 1;
-      this.deathAnimationFinished = true;
-    }
+    if (this.deathAnimationIndex >= this.IMAGES_DEAD.length - 1) return this.finishDeathAnimation();
+    this.setDeathFrame();
+  }
+
+  finishDeathAnimation() {
+    this.deathAnimationIndex = this.IMAGES_DEAD.length - 1;
+    this.deathAnimationFinished = true;
     this.setDeathFrame();
   }
 

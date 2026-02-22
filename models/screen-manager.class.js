@@ -123,34 +123,6 @@ class ScreenManager {
   }
 
   /**
-   * Returns top right button area
-   * @returns {string} HTML template string
-   */
-  getTopRightButtonsTemplate() {
-    return `
-      <div class="button-container top-right-buttons">
-        <div class="top-right-button-row">
-          ${this.getStartButtonTemplate()}
-          ${this.getMuteButtonTemplate()}
-          ${this.getFullscreenButtonTemplate()}
-          ${this.getControlsButtonTemplate()}
-          ${this.getImpressumButtonTemplate()}
-        </div>
-        <div id="controls-info" class="startscreen-info hidden" aria-live="polite">
-          Tastatur: <br>
-          ←/→: Laufen <br>
-          Leertaste: Springen <br>
-          D: Werfen
-        </div>
-        <div id="imprint-info" class="startscreen-info hidden" aria-live="polite">
-          Dieses Game wurde erstellt von: Thomas Többe-Hömke <br>
-          Mail: toebbe.thomas@outlook.de
-        </div>
-      </div>
-    `;
-  }
-
-  /**
    * Returns start button template
    * @returns {string} HTML template string
    */
@@ -394,3 +366,6 @@ class ScreenManager {
     document.dispatchEvent(startEvent);
   }
 }
+
+
+

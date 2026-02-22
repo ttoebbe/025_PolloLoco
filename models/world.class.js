@@ -4,7 +4,8 @@ class World {
   canvas;
   ctx;
   keyboard;
-  camera_x = 0;
+  cameraX = 0;
+  renderer;
   statusBar = new StatusBar();
   coinBar = new CoinStatusBar();
   bottleBar = new BottleStatusBar();
@@ -20,7 +21,6 @@ class World {
   endbossDefeatedTime = 0;
   throwCooldownMs = 500;
   lastThrowTime = 0;
-
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
@@ -30,6 +30,7 @@ class World {
     this.updateCoinBar();
     this.updateBottleBar();
     this.setupGameStateManager();
+    this.renderer = new WorldRenderer(this);
     this.draw();
     this.setWorld();
     this.run();
@@ -38,19 +39,21 @@ class World {
   setWorld() {
     this.character.world = this;
     this.character.startAnimations(this.gameStateManager);
-    
-    // Start animations for all enemies that support it
-    this.level.enemies.forEach(enemy => {
-      if (typeof enemy.startAnimations === 'function') {
-        enemy.startAnimations(this.gameStateManager, this.character);
-      }
+    this.startEnemyAnimations();
+    this.startCloudAnimations();
+  }
+
+  startEnemyAnimations() {
+    this.level.enemies.forEach((enemy) => {
+      if (typeof enemy.startAnimations !== "function") return;
+      enemy.startAnimations(this.gameStateManager, this.character);
     });
-    
-    // Start animations for clouds
-    this.level.clouds.forEach(cloud => {
-      if (typeof cloud.startAnimations === 'function') {
-        cloud.startAnimations(this.gameStateManager);
-      }
+  }
+
+  startCloudAnimations() {
+    this.level.clouds.forEach((cloud) => {
+      if (typeof cloud.startAnimations !== "function") return;
+      cloud.startAnimations(this.gameStateManager);
     });
   }
 
@@ -69,14 +72,14 @@ class World {
    * Checks if player wants to throw a bottle
    */
   checkThrowableObject() {
-    if (!this.keyboard.D) return;
-    this.markAudioActivity();
+    if (!this.keyboard.d) return;
+    window.audioManager?.markActivity();
     if (!this.canThrowBottle()) {
-      this.keyboard.D = false;
+      this.keyboard.d = false;
       return;
     }
     this.throwBottle();
-    this.keyboard.D = false;
+    this.keyboard.d = false;
   }
 
   /**
@@ -111,7 +114,7 @@ class World {
     this.lastThrowTime = Date.now();
     this.collectedBottles = Math.max(0, this.collectedBottles - 1);
     this.updateBottleBar();
-    this.playThrowSound();
+    window.audioManager?.playThrow();
   }
 
   checkCollisions() {
@@ -140,7 +143,7 @@ class World {
       this.level.coins.splice(i, 1);
       this.collectedCoins++;
       this.updateCoinBar();
-      this.playCoinCollectSound();
+      window.audioManager?.playCoinCollect();
     }
   }
 
@@ -150,7 +153,7 @@ class World {
       this.level.bottles.splice(i, 1);
       this.collectedBottles++;
       this.updateBottleBar();
-      this.playBottleCollectSound();
+      window.audioManager?.playBottleCollect();
     }
   }
 
@@ -181,12 +184,9 @@ class World {
       this.character.hit();
     }
     this.updateHealthBar();
-    this.playCharacterHurtSound();
+    window.audioManager?.playCharacterHurt();
   }
 
-  /**
-   * Checks collisions between throwable objects and enemies
-   */
   /**
    * Checks collisions between throwable objects and enemies
    */
@@ -227,7 +227,7 @@ class World {
    */
   handleBottleEnemyHit(enemy) {
     enemy.hit();
-    this.playBottleBreakSound();
+    window.audioManager?.playBottleBreak();
     
     if (enemy instanceof Endboss) {
       enemy.applyStun();
@@ -270,22 +270,18 @@ class World {
    * Removes dead enemies after 3 seconds (except Endboss)
    */
   cleanupDeadEnemies() {
-    let currentTime = new Date().getTime();
-    
+    let currentTime = Date.now();
     for (let i = this.level.enemies.length - 1; i >= 0; i--) {
       let enemy = this.level.enemies[i];
-      
-      // Don't remove Endboss - player should see it when they win
-      if (enemy instanceof Endboss) continue;
-      
-      if (enemy.isDead() && enemy.deathTime > 0) {
-        let timeSinceDeath = (currentTime - enemy.deathTime) / 1000;
-        
-        if (timeSinceDeath >= 3) {
-          this.level.enemies.splice(i, 1);
-        }
-      }
+      if (!this.shouldRemoveEnemy(enemy, currentTime)) continue;
+      this.level.enemies.splice(i, 1);
     }
+  }
+
+  shouldRemoveEnemy(enemy, currentTime) {
+    if (enemy instanceof Endboss) return false;
+    if (!enemy.isDead() || enemy.deathTime <= 0) return false;
+    return (currentTime - enemy.deathTime) / 1000 >= 3;
   }
 
   updateCoinBar() {
@@ -307,54 +303,8 @@ class World {
   }
 
   draw() {
-    if (this.gameStateManager.isRunning()) {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.translate(this.camera_x, 0);
-      this.addObjectsToMap(this.level.backgroundObjects);
-      this.addObjectsToMap(this.level.clouds);
-      this.addObjectsToMap(this.level.coins);
-      this.addObjectsToMap(this.level.bottles);
-      this.addToMap(this.character);
-      this.addObjectsToMap(this.level.enemies);
-      this.addObjectsToMap(this.throwableObjects);
-      this.ctx.translate(-this.camera_x, 0);
-      this.addToMap(this.statusBar);
-      this.addToMap(this.coinBar);
-      this.addToMap(this.bottleBar);
-      if (this.endbossNearby) {
-        this.addToMap(this.endbossBar);
-      }
-    }
+    this.renderer.drawFrame();
     requestAnimationFrame(() => this.draw());
-  }
-
-  addObjectsToMap(objects) {
-    objects.forEach((object) => {
-      this.addToMap(object);
-    });
-  }
-
-  addToMap(movableObject) {
-    if (movableObject.otherDirection) {
-      this.flipImage(movableObject);
-    }
-    movableObject.draw(this.ctx);
-    // movableObject.drawFrame(this.ctx);
-    if (movableObject.otherDirection) {
-      this.flipImageBack(movableObject);
-    }
-  }
-
-  flipImage(movableObject) {
-    this.ctx.save();
-    this.ctx.translate(movableObject.width, 0);
-    this.ctx.scale(-1, 1);
-    movableObject.x = movableObject.x * -1;
-  }
-
-  flipImageBack(movableObject) {
-    movableObject.x = movableObject.x * -1;
-    this.ctx.restore();
   }
 
   /**
@@ -372,76 +322,11 @@ class World {
    */
   checkGameOver() {
     if (this.character.isDead() && this.gameStateManager.isRunning()) {
-      this.playCharacterDeadSound();
+      window.audioManager?.playCharacterDead();
       this.gameStateManager.setState(GameStateManager.STATES.GAME_OVER);
       this.screenManager.showGameOver();
-      this.dispatchGameEnded("lose");
+      document.dispatchEvent(new CustomEvent("gameEnded", { detail: { result: "lose" } }));
     }
-  }
-
-  /**
-   * Plays throw sound effect
-   */
-  playThrowSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playThrow();
-  }
-
-  /**
-   * Plays coin collect sound effect
-   */
-  playCoinCollectSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playCoinCollect();
-  }
-
-  /**
-   * Plays bottle collect sound effect
-   */
-  playBottleCollectSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playBottleCollect();
-  }
-
-  /**
-   * Plays bottle break sound effect
-   */
-  playBottleBreakSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playBottleBreak();
-  }
-
-  /**
-   * Plays character hurt sound effect
-   */
-  playCharacterHurtSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playCharacterHurt();
-  }
-
-  /**
-   * Plays character dead sound effect
-   */
-  playCharacterDeadSound() {
-    if (!window.audioManager) return;
-    window.audioManager.playCharacterDead();
-  }
-
-  /**
-   * Marks one gameplay activity for audio manager
-   */
-  markAudioActivity() {
-    if (!window.audioManager) return;
-    window.audioManager.markActivity();
-  }
-
-  /**
-   * Dispatches an ended event with result info
-   * @param {string} result - End result value
-   */
-  dispatchGameEnded(result) {
-    const endedEvent = new CustomEvent("gameEnded", { detail: { result } });
-    document.dispatchEvent(endedEvent);
   }
 
   /**
@@ -455,7 +340,7 @@ class World {
     if (timeSinceDefeat < 3 || !this.gameStateManager.isRunning()) return;
     this.gameStateManager.setState(GameStateManager.STATES.WON);
     this.screenManager.showWinScreen();
-    this.dispatchGameEnded("win");
+    document.dispatchEvent(new CustomEvent("gameEnded", { detail: { result: "win" } }));
   }
 
   /**
@@ -483,7 +368,7 @@ class World {
   resetGameObjects() {
     this.character = new Character();
     this.level = createLevel1();
-    this.camera_x = 0;
+    this.cameraX = 0;
     this.throwableObjects = [];
     this.lastThrowTime = 0;
     this.collectedCoins = 0;

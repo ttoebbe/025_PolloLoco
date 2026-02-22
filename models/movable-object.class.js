@@ -117,6 +117,6 @@ class MovableObject extends DrawableObject {
 
   jump() {
     this.speedY = 18;
-    this.world.keyboard.SPACE = false; // Reset after jump
+    this.world.keyboard.space = false; // Reset after jump
   }
 }

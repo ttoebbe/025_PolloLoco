@@ -108,11 +108,23 @@ class ScreenManager {
   getTopRightButtonsTemplate() {
     return `
       <div class="button-container top-right-buttons">
-        ${this.getStartButtonTemplate()}
-        ${this.getMuteButtonTemplate()}
-        ${this.getFullscreenButtonTemplate()}
-        ${this.getControlsButtonTemplate()}
-        ${this.getImpressumButtonTemplate()}
+        <div class="top-right-button-row">
+          ${this.getStartButtonTemplate()}
+          ${this.getMuteButtonTemplate()}
+          ${this.getFullscreenButtonTemplate()}
+          ${this.getControlsButtonTemplate()}
+          ${this.getImpressumButtonTemplate()}
+        </div>
+        <div id="controls-info" class="startscreen-info hidden" aria-live="polite">
+          Tastatur: <br>
+          ←/→: Laufen <br>
+          Leertaste: Springen <br>
+          D: Werfen
+        </div>
+        <div id="imprint-info" class="startscreen-info hidden" aria-live="polite">
+          Dieses Game wurde erstellt von: Thomas Többe-Hömke <br>
+          Mail: toebbe.thomas@outlook.de
+        </div>
       </div>
     `;
   }
@@ -151,7 +163,7 @@ class ScreenManager {
    */
   getControlsButtonTemplate() {
     return `
-      <button id="controls" class="icon-button" type="button">
+      <button id="controls" class="icon-button" type="button" aria-expanded="false" aria-controls="controls-info">
         <img src="img/button_background_images/controls.svg" alt="Controls">
       </button>
     `;
@@ -163,7 +175,7 @@ class ScreenManager {
    */
   getImpressumButtonTemplate() {
     return `
-      <button id="impressum" class="icon-button" type="button">
+      <button id="impressum" class="icon-button" type="button" aria-expanded="false" aria-controls="imprint-info">
         <img src="img/button_background_images/imprint.svg" alt="Imprint">
       </button>
     `;
@@ -196,8 +208,8 @@ class ScreenManager {
     this.bindButtonClick("start-button", () => this.triggerStart());
     this.bindButtonClick("mute", () => this.toggleMute());
     this.bindButtonClick("fullscreen-toggle", () => this.toggleFullscreen());
-    this.bindButtonClick("controls", () => this.handlePlaceholderClick("Controls"));
-    this.bindButtonClick("impressum", () => this.handlePlaceholderClick("Imprint"));
+    this.bindButtonClick("controls", () => this.toggleInfoPanel("controls"));
+    this.bindButtonClick("impressum", () => this.toggleInfoPanel("imprint"));
   }
 
   /**
@@ -286,11 +298,39 @@ class ScreenManager {
   }
 
   /**
-   * Handles placeholder button actions
-   * @param {string} sectionName - Placeholder name
+   * Toggles one startscreen info panel and closes the other
+   * @param {"controls" | "imprint"} panelName - Panel to toggle
    */
-  handlePlaceholderClick(sectionName) {
-    console.info(`${sectionName} placeholder is not implemented yet.`);
+  toggleInfoPanel(panelName) {
+    const controlsInfo = document.getElementById("controls-info");
+    const imprintInfo = document.getElementById("imprint-info");
+    if (!controlsInfo || !imprintInfo) return;
+
+    const isControlsOpen = !controlsInfo.classList.contains("hidden");
+    const isImprintOpen = !imprintInfo.classList.contains("hidden");
+
+    if (panelName === "controls") {
+      this.setInfoPanelVisibility(!isControlsOpen, false);
+      return;
+    }
+    this.setInfoPanelVisibility(false, !isImprintOpen);
+  }
+
+  /**
+   * Applies startscreen info panel visibility and aria states
+   * @param {boolean} controlsOpen - Controls info visible state
+   * @param {boolean} imprintOpen - Imprint info visible state
+   */
+  setInfoPanelVisibility(controlsOpen, imprintOpen) {
+    const controlsInfo = document.getElementById("controls-info");
+    const imprintInfo = document.getElementById("imprint-info");
+    const controlsButton = document.getElementById("controls");
+    const imprintButton = document.getElementById("impressum");
+
+    if (controlsInfo) controlsInfo.classList.toggle("hidden", !controlsOpen);
+    if (imprintInfo) imprintInfo.classList.toggle("hidden", !imprintOpen);
+    if (controlsButton) controlsButton.setAttribute("aria-expanded", `${controlsOpen}`);
+    if (imprintButton) imprintButton.setAttribute("aria-expanded", `${imprintOpen}`);
   }
 
   /**

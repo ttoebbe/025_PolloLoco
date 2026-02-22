@@ -185,8 +185,17 @@ canvas {
     right: 10px;
     z-index: 3;
     max-width: calc(100% - 20px);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.top-right-button-row {
+    display: flex;
     justify-content: flex-end;
+    align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
 }
 
 .top-right-buttons button {
@@ -257,6 +266,23 @@ body[data-game-state="running"] #runtime-mute {
 
 #mute:hover {
     transform: translateY(-1px);
+}
+
+.startscreen-info {
+    max-width: min(360px, calc(100vw - 40px));
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #f8e5b6;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    z-index: 3;
+}
+
+.startscreen-info.hidden {
+    display: none;
 }
 
 .mobile-button-container {
@@ -356,7 +382,16 @@ body[data-game-state="running"] #runtime-mute {
     .top-right-buttons {
         right: 8px;
         left: 8px;
+    }
+
+    .top-right-button-row {
         gap: 8px;
+    }
+
+    .startscreen-info {
+        max-width: min(300px, calc(100vw - 32px));
+        padding: 7px 9px;
+        font-size: 12px;
     }
 
     .button-container button {

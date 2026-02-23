@@ -5,6 +5,10 @@
     --ui-space: 170px;
     --canvas-max-width: 720px;
     --startscreen-button-height: 46px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
 }
 
 html,
@@ -198,10 +202,10 @@ canvas {
 
 .top-right-buttons {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: calc(var(--safe-top) + 10px);
+    right: calc(var(--safe-right) + 10px);
+    left: calc(var(--safe-left) + 10px);
     z-index: 3;
-    max-width: calc(100% - 20px);
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
@@ -209,6 +213,7 @@ canvas {
 
 .top-right-button-row {
     display: flex;
+    width: 100%;
     justify-content: flex-end;
     align-items: center;
     flex-wrap: wrap;
@@ -268,7 +273,7 @@ canvas {
 
 #runtime-controls {
     position: absolute;
-    top: 10px;
+    top: calc(var(--safe-top) + 10px);
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -295,6 +300,7 @@ body[data-game-state="paused"] #runtime-controls {
     box-shadow: 2px 2px 0 #8b4513;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 #runtime-controls button:hover {
@@ -348,17 +354,17 @@ body[data-game-state="paused"] #runtime-controls {
 
 .mobile-controls-group {
     position: absolute;
-    bottom: 16px;
+    bottom: calc(var(--safe-bottom) + 16px);
     display: flex;
     gap: 12px;
 }
 
 .mobile-controls-left {
-    left: 16px;
+    left: calc(var(--safe-left) + 16px);
 }
 
 .mobile-controls-right {
-    right: 16px;
+    right: calc(var(--safe-right) + 16px);
 }
 
 .mobile-button-container button {
@@ -372,7 +378,7 @@ body[data-game-state="paused"] #runtime-controls {
     background-color: rgba(255, 255, 255, 0.8);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     pointer-events: auto;
-    touch-action: none;
+    touch-action: manipulation;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -404,15 +410,33 @@ body[data-game-state="paused"] #runtime-controls {
     font-size: clamp(16px, 4vw, 24px);
 }
 
-@media (max-width: 1199px) and (orientation: portrait) {
+@media (hover: none) and (pointer: coarse) and (orientation: portrait),
+    (any-hover: none) and (any-pointer: coarse) and (orientation: portrait) {
     #orientation-overlay {
         display: flex;
     }
 }
 
-@media (max-width: 1199px) and (orientation: landscape) {
+@media (hover: none) and (pointer: coarse) and (orientation: landscape),
+    (any-hover: none) and (any-pointer: coarse) and (orientation: landscape) {
     body[data-game-state="running"] .mobile-button-container button {
         display: flex;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape),
+    (any-hover: none) and (any-pointer: coarse) and (orientation: landscape) {
+    :root {
+        --startscreen-button-height: 40px;
+    }
+
+    .top-right-button-row {
+        gap: clamp(6px, 1.8vw, 10px);
+    }
+
+    .button-container button {
+        padding: clamp(6px, 1.6vh, 10px) clamp(10px, 2vw, 16px);
+        font-size: clamp(14px, 2.1vw, 17px);
     }
 }
 
@@ -437,12 +461,13 @@ body[data-game-state="paused"] #runtime-controls {
     }
 
     .top-right-buttons {
-        right: 8px;
-        left: 8px;
+        top: calc(var(--safe-top) + 8px);
+        right: calc(var(--safe-right) + 8px);
+        left: calc(var(--safe-left) + 8px);
     }
 
     #runtime-controls {
-        top: 8px;
+        top: calc(var(--safe-top) + 8px);
     }
 
     .top-right-button-row {
@@ -491,6 +516,28 @@ body[data-game-state="paused"] #runtime-controls {
     }
 
     .mobile-controls-group {
-        bottom: 10px;
+        bottom: calc(var(--safe-bottom) + 8px);
+    }
+
+    .mobile-button-container button {
+        width: 56px;
+        height: 56px;
+    }
+
+    .mobile-button-container button img {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-height: 390px) {
+    .mobile-button-container button {
+        width: 52px;
+        height: 52px;
+    }
+
+    .mobile-button-container button img {
+        width: 26px;
+        height: 26px;
     }
 }

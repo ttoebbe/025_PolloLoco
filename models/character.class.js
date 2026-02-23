@@ -54,6 +54,11 @@ class Character extends MovableObject {
   ];
 
   world;
+  jumpPhase = "none";
+  jumpUpFrameIndex = 0;
+  jumpDownFrameIndex = 0;
+  jumpUpImages = this.IMAGES_JUMPING.slice(0, 4);
+  jumpDownImages = this.IMAGES_JUMPING.slice(4);
   //   currentImageIndex = 0;
 
   constructor() {
@@ -122,6 +127,7 @@ class Character extends MovableObject {
   handleJumpInput() {
     if (!this.world.keyboard.space || this.isAboveGround()) return;
     this.jump();
+    this.startJumpCycle();
     this.playJumpSound();
     this.markAudioActivity();
   }
@@ -191,10 +197,68 @@ class Character extends MovableObject {
    * @returns {boolean} True when handled
    */
   handleJumpAnimation() {
-    if (!this.isAboveGround()) return false;
-    this.playAnimation(this.IMAGES_JUMPING);
+    if (!this.isAboveGround()) {
+      this.resetJumpCycle();
+      return false;
+    }
+    if (this.jumpPhase === "none") this.startJumpCycle();
+    this.setJumpPhaseByVelocity();
+    if (this.jumpPhase === "up") this.playJumpUpFrame();
+    if (this.jumpPhase === "down") this.playJumpDownFrame();
     this.updateIdleAudio(false);
     return true;
+  }
+
+  /**
+   * Initializes jump animation state for a new jump cycle
+   */
+  startJumpCycle() {
+    this.jumpPhase = "up";
+    this.jumpUpFrameIndex = 0;
+    this.jumpDownFrameIndex = 0;
+  }
+
+  /**
+   * Sets jump phase based on current vertical velocity
+   */
+  setJumpPhaseByVelocity() {
+    if (this.speedY > 0) {
+      this.jumpPhase = "up";
+      return;
+    }
+    this.jumpPhase = "down";
+  }
+
+  /**
+   * Plays upward jump frames J-31 to J-34
+   */
+  playJumpUpFrame() {
+    const maxIndex = this.jumpUpImages.length - 1;
+    const frameIndex = Math.min(this.jumpUpFrameIndex, maxIndex);
+    const path = this.jumpUpImages[frameIndex];
+    this.img = this.imageCache[path];
+    if (this.jumpUpFrameIndex < maxIndex) this.jumpUpFrameIndex++;
+  }
+
+  /**
+   * Plays downward jump frames J-35 to J-39
+   */
+  playJumpDownFrame() {
+    const maxIndex = this.jumpDownImages.length - 1;
+    const frameIndex = Math.min(this.jumpDownFrameIndex, maxIndex);
+    const path = this.jumpDownImages[frameIndex];
+    this.img = this.imageCache[path];
+    if (this.jumpDownFrameIndex < maxIndex) this.jumpDownFrameIndex++;
+  }
+
+  /**
+   * Resets jump cycle after landing for the next jump
+   */
+  resetJumpCycle() {
+    if (this.jumpPhase === "none") return;
+    this.jumpPhase = "none";
+    this.jumpUpFrameIndex = 0;
+    this.jumpDownFrameIndex = 0;
   }
 
   /**

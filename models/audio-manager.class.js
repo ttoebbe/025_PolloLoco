@@ -1,12 +1,15 @@
 /**
  * Central audio control for music and sound effects.
  */
+const AUDIO_MUTE_STORAGE_KEY = "pollo-loco-audio-muted";
+
 class AudioManager {
   /**
    * Creates a new audio manager instance.
    */
   constructor() {
     this.initializeState();
+    this.restoreMutedState();
     this.initializeDelays();
     this.sounds = {};
     this.registerAllSounds();
@@ -27,6 +30,30 @@ class AudioManager {
     this.idleIntervalId = null;
     this.backgroundMusicStarted = false;
     this.autoplayUnlockHandler = null;
+  }
+
+  /**
+   * Restores muted state from browser storage.
+   */
+  restoreMutedState() {
+    const storedState = this.readMutedStateFromStorage();
+    if (storedState === null) return;
+    this.isMuted = storedState;
+  }
+
+  /**
+   * Reads muted state value from storage.
+   * @returns {boolean | null} Stored muted state or null.
+   */
+  readMutedStateFromStorage() {
+    try {
+      const value = window.localStorage.getItem(AUDIO_MUTE_STORAGE_KEY);
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -119,8 +146,18 @@ class AudioManager {
   toggleMute() {
     this.isMuted = !this.isMuted;
     this.applyMutedState();
+    this.persistMutedState();
     this.dispatchMuteChanged();
     if (!this.isMuted) this.startBackgroundMusic();
+  }
+
+  /**
+   * Persists current muted state in browser storage.
+   */
+  persistMutedState() {
+    try {
+      window.localStorage.setItem(AUDIO_MUTE_STORAGE_KEY, `${this.isMuted}`);
+    } catch {}
   }
 
   /**

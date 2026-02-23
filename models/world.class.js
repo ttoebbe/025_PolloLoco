@@ -192,12 +192,13 @@ class World {
    */
   checkThrowableCollisions() {
     for (let i = this.throwableObjects.length - 1; i >= 0; i--) {
-      let bottle = this.throwableObjects[i];
-      let bottleHit = this.checkBottleHitEnemies(bottle);
-      
-      if (bottleHit) {
+      const bottle = this.throwableObjects[i];
+      if (bottle.shouldRemove()) {
         this.throwableObjects.splice(i, 1);
+        continue;
       }
+      if (this.checkBottleHitEnemies(bottle)) continue;
+      this.checkBottleGroundImpact(bottle);
     }
   }
 
@@ -207,32 +208,39 @@ class World {
    * @returns {boolean} True if bottle hit an enemy
    */
   checkBottleHitEnemies(bottle) {
+    if (bottle.isSplashing) return false;
     let bottleHit = false;
-    
     this.level.enemies.forEach((enemy) => {
       if (bottleHit) return;
-      if (!bottle.isColliding(enemy)) return;
-      if (enemy.isDead()) return;
-      
-      this.handleBottleEnemyHit(enemy);
+      if (!bottle.isColliding(enemy) || enemy.isDead()) return;
+      this.handleBottleEnemyHit(enemy, bottle);
       bottleHit = true;
     });
-    
     return bottleHit;
   }
 
   /**
    * Handles bottle hitting an enemy
    * @param {MovableObject} enemy - The enemy that was hit
+   * @param {ThrowableObject} bottle - The bottle that caused the hit
    */
-  handleBottleEnemyHit(enemy) {
+  handleBottleEnemyHit(enemy, bottle) {
     enemy.hit();
+    bottle.startSplash();
     window.audioManager?.playBottleBreak();
-    
-    if (enemy instanceof Endboss) {
-      enemy.applyStun();
-      this.updateEndbossBar();
-    }
+    if (!(enemy instanceof Endboss)) return;
+    enemy.applyStun();
+    this.updateEndbossBar();
+  }
+
+  /**
+   * Triggers splash when bottle impacts the ground.
+   * @param {ThrowableObject} bottle - The bottle to inspect
+   */
+  checkBottleGroundImpact(bottle) {
+    if (bottle.isSplashing || !bottle.hasGroundImpact()) return;
+    bottle.startSplash();
+    window.audioManager?.playBottleBreak();
   }
 
   /**

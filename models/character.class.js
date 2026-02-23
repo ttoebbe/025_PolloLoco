@@ -40,6 +40,19 @@ class Character extends MovableObject {
     "img/2_character_pepe/4_hurt/H-43.png",
   ];
 
+  IMAGES_IDLE = [
+    "img/2_character_pepe/1_idle/idle/I-1.png",
+    "img/2_character_pepe/1_idle/idle/I-2.png",
+    "img/2_character_pepe/1_idle/idle/I-3.png",
+    "img/2_character_pepe/1_idle/idle/I-4.png",
+    "img/2_character_pepe/1_idle/idle/I-5.png",
+    "img/2_character_pepe/1_idle/idle/I-6.png",
+    "img/2_character_pepe/1_idle/idle/I-7.png",
+    "img/2_character_pepe/1_idle/idle/I-8.png",
+    "img/2_character_pepe/1_idle/idle/I-9.png",
+    "img/2_character_pepe/1_idle/idle/I-10.png",
+  ];
+
   IMAGES_LONG_IDLE = [
     "img/2_character_pepe/1_idle/long_idle/I-11.png",
     "img/2_character_pepe/1_idle/long_idle/I-12.png",
@@ -67,6 +80,7 @@ class Character extends MovableObject {
     this.loadImages(this.IMAGES_JUMPING);
     this.loadImages(this.IMAGES_DEAD);
     this.loadImages(this.IMAGES_HURT);
+    this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_LONG_IDLE);
   }
 
@@ -166,8 +180,8 @@ class Character extends MovableObject {
     if (this.handleHurtAnimation()) return;
     if (this.handleJumpAnimation()) return;
     if (this.handleLongIdleAnimation()) return;
+    if (this.handleIdleAnimation()) return;
     this.playGroundAnimation();
-    this.updateIdleAudio(this.isIdleState());
   }
 
   /**
@@ -266,10 +280,21 @@ class Character extends MovableObject {
    * @returns {boolean} True when handled
    */
   handleLongIdleAnimation() {
-    if (this.isAboveGround() || !this.isIdleState()) return false;
+    if (!this.isGroundIdleState()) return false;
     const audioManager = window.audioManager;
     if (!audioManager?.isLongIdleActive?.()) return false;
     this.playAnimation(this.IMAGES_LONG_IDLE);
+    this.updateIdleAudio(true);
+    return true;
+  }
+
+  /**
+   * Plays normal idle animation while grounded and inactive
+   * @returns {boolean} True when handled
+   */
+  handleIdleAnimation() {
+    if (!this.isGroundIdleState()) return false;
+    this.playAnimation(this.IMAGES_IDLE);
     this.updateIdleAudio(true);
     return true;
   }
@@ -280,6 +305,7 @@ class Character extends MovableObject {
   playGroundAnimation() {
     if (!this.world.keyboard.right && !this.world.keyboard.left) return;
     this.playAnimation(this.IMAGES_WALKING);
+    this.updateIdleAudio(false);
   }
 
   /**
@@ -288,6 +314,15 @@ class Character extends MovableObject {
    */
   isIdleState() {
     return !this.world.keyboard.right && !this.world.keyboard.left;
+  }
+
+  /**
+   * Checks whether character is grounded and idle
+   * @returns {boolean} True when idle on ground
+   */
+  isGroundIdleState() {
+    if (this.isAboveGround()) return false;
+    return this.isIdleState();
   }
 
   /**

@@ -34,7 +34,7 @@ class AudioManager {
    */
   initializeDelays() {
     this.walkLoopDelayMs = 140;
-    this.idleDelayMs = 5000;
+    this.idleDelayMs = 6000;
     this.idleCheckDelayMs = 250;
   }
 

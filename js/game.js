@@ -12,6 +12,7 @@ function init() {
   screenManager = new ScreenManager();
   setGameUiState("start");
   bindMobileControls();
+  bindContextMenuBlocker();
   bindRuntimeMuteButton();
   bindRuntimePauseButton();
   screenManager.showStartScreen();
@@ -34,6 +35,27 @@ function bindMobileControls() {
   bindPointerControl("mobile-right", "right");
   bindPointerControl("mobile-jump", "space");
   bindPointerControl("mobile-throw", "d");
+}
+
+function bindContextMenuBlocker() {
+  document.addEventListener("contextmenu", handleContextMenuBlock, { capture: true });
+}
+
+function isContextMenuBlockActive() {
+  const gameState = document.body?.getAttribute("data-game-state");
+  return gameState === "running" || gameState === "paused";
+}
+
+function isGameplayTouchTarget(target) {
+  if (!(target instanceof Element)) return false;
+  if (target.id === "canvas") return true;
+  return target.closest("#mobile-controls button") !== null;
+}
+
+function handleContextMenuBlock(event) {
+  if (!isContextMenuBlockActive()) return;
+  if (!isGameplayTouchTarget(event.target)) return;
+  event.preventDefault();
 }
 
 function bindPointerControl(buttonId, keyName) {

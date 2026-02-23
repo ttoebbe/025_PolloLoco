@@ -341,6 +341,84 @@ body[data-game-state="paused"] #runtime-controls {
     z-index: 3;
 }
 
+.imprint-modal {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.imprint-modal.hidden {
+    display: none;
+}
+
+.imprint-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.imprint-dialog {
+    position: relative;
+    width: min(560px, calc(100% - 24px));
+    max-height: calc(100% - 24px);
+    border: 2px solid #8b4513;
+    border-radius: 10px;
+    background: #1d1308;
+    color: #f8e5b6;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.imprint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(248, 229, 182, 0.22);
+}
+
+.imprint-header h2 {
+    margin: 0;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    text-transform: uppercase;
+}
+
+.imprint-close-button {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 2px solid #8b4513;
+    border-radius: 8px;
+    background: #ffd700;
+    font-family: "Courier New", Courier, monospace;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.imprint-content {
+    padding: 12px 14px 14px;
+    overflow-y: auto;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.imprint-content p {
+    margin: 0 0 12px;
+}
+
+.imprint-content p:last-child {
+    margin-bottom: 0;
+}
+
 .startscreen-info.hidden {
     display: none;
 }
@@ -478,6 +556,34 @@ body[data-game-state="paused"] #runtime-controls {
         max-width: min(300px, calc(100vw - 32px));
         padding: 7px 9px;
         font-size: 12px;
+    }
+
+    .imprint-modal {
+        padding: 8px;
+    }
+
+    .imprint-dialog {
+        width: calc(100% - 12px);
+        max-height: calc(100% - 12px);
+    }
+
+    .imprint-header {
+        padding: 10px 12px;
+    }
+
+    .imprint-header h2 {
+        font-size: 18px;
+    }
+
+    .imprint-close-button {
+        min-height: 34px;
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .imprint-content {
+        padding: 10px 12px 12px;
+        font-size: 13px;
     }
 
     .button-container button,

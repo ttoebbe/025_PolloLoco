@@ -8,6 +8,7 @@ class ScreenManager {
   constructor() {
     this.overlayContainer = null;
     this.gameOverKeyHandler = null;
+    this.imprintEscapeHandler = null;
     this.createOverlayContainer();
     this.setupAudioListeners();
   }
@@ -63,6 +64,7 @@ class ScreenManager {
    */
   hideScreens() {
     this.removeGameOverListeners();
+    this.closeImprintModal(false);
     this.overlayContainer.classList.add("hidden");
     this.overlayContainer.innerHTML = "";
   }
@@ -144,6 +146,7 @@ class ScreenManager {
     return `
       <div class="screen-content startscreen">
         ${this.getTopRightButtonsTemplate()}
+        ${this.getImprintModalTemplate()}
         <img src="img/9_intro_outro_screens/start/startscreen_2.png" alt="Start Screen" class="screen-image startscreen-image">
       </div>
     `;
@@ -195,7 +198,7 @@ class ScreenManager {
    */
   getImpressumButtonTemplate() {
     return `
-      <button id="impressum" class="icon-button" type="button" aria-expanded="false" aria-controls="imprint-info">
+      <button id="impressum" class="icon-button" type="button" aria-expanded="false" aria-controls="imprint-modal">
         <img src="img/button_background_images/imprint.svg" alt="Imprint">
       </button>
     `;
@@ -251,7 +254,16 @@ class ScreenManager {
     this.bindButtonClick("mute", () => this.toggleMute());
     this.bindButtonClick("fullscreen-toggle", () => this.toggleFullscreen());
     this.bindButtonClick("controls", () => this.toggleInfoPanel("controls"));
-    this.bindButtonClick("impressum", () => this.toggleInfoPanel("imprint"));
+    this.bindButtonClick("impressum", () => this.openImprintModal());
+    this.bindImprintModalListeners();
+  }
+
+  /**
+   * Binds imprint modal close actions
+   */
+  bindImprintModalListeners() {
+    this.bindButtonClick("imprint-close", () => this.closeImprintModal());
+    this.bindButtonClick("imprint-backdrop", () => this.closeImprintModal());
   }
 
   /**
@@ -340,39 +352,73 @@ class ScreenManager {
   }
 
   /**
-   * Toggles one startscreen info panel and closes the other
-   * @param {"controls" | "imprint"} panelName - Panel to toggle
+   * Toggles the startscreen controls panel
+   * @param {"controls"} panelName - Panel to toggle
    */
   toggleInfoPanel(panelName) {
     const controlsInfo = document.getElementById("controls-info");
-    const imprintInfo = document.getElementById("imprint-info");
-    if (!controlsInfo || !imprintInfo) return;
-
+    if (!controlsInfo || panelName !== "controls") return;
     const isControlsOpen = !controlsInfo.classList.contains("hidden");
-    const isImprintOpen = !imprintInfo.classList.contains("hidden");
-
-    if (panelName === "controls") {
-      this.setInfoPanelVisibility(!isControlsOpen, false);
-      return;
-    }
-    this.setInfoPanelVisibility(false, !isImprintOpen);
+    this.setInfoPanelVisibility(!isControlsOpen, false);
   }
 
   /**
-   * Applies startscreen info panel visibility and aria states
+   * Applies startscreen panel visibility and aria states
    * @param {boolean} controlsOpen - Controls info visible state
-   * @param {boolean} imprintOpen - Imprint info visible state
+   * @param {boolean} imprintOpen - Imprint modal visible state
    */
   setInfoPanelVisibility(controlsOpen, imprintOpen) {
     const controlsInfo = document.getElementById("controls-info");
-    const imprintInfo = document.getElementById("imprint-info");
+    const imprintModal = document.getElementById("imprint-modal");
     const controlsButton = document.getElementById("controls");
     const imprintButton = document.getElementById("impressum");
 
-    if (controlsInfo) controlsInfo.classList.toggle("hidden", !controlsOpen);
-    if (imprintInfo) imprintInfo.classList.toggle("hidden", !imprintOpen);
-    if (controlsButton) controlsButton.setAttribute("aria-expanded", `${controlsOpen}`);
-    if (imprintButton) imprintButton.setAttribute("aria-expanded", `${imprintOpen}`);
+    controlsInfo?.classList.toggle("hidden", !controlsOpen);
+    imprintModal?.classList.toggle("hidden", !imprintOpen);
+    imprintModal?.setAttribute("aria-hidden", `${!imprintOpen}`);
+    controlsButton?.setAttribute("aria-expanded", `${controlsOpen}`);
+    imprintButton?.setAttribute("aria-expanded", `${imprintOpen}`);
+  }
+
+  /**
+   * Opens the imprint modal and moves focus to close button
+   */
+  openImprintModal() {
+    this.setInfoPanelVisibility(false, true);
+    this.bindImprintEscape();
+    document.getElementById("imprint-close")?.focus();
+  }
+
+  /**
+   * Closes the imprint modal and optionally restores focus
+   * @param {boolean} restoreFocus - Restore focus to imprint button
+   */
+  closeImprintModal(restoreFocus = true) {
+    this.setInfoPanelVisibility(false, false);
+    this.unbindImprintEscape();
+    if (!restoreFocus) return;
+    document.getElementById("impressum")?.focus();
+  }
+
+  /**
+   * Binds escape key while imprint modal is open
+   */
+  bindImprintEscape() {
+    if (this.imprintEscapeHandler) return;
+    this.imprintEscapeHandler = (event) => {
+      if (event.key !== "Escape") return;
+      this.closeImprintModal();
+    };
+    document.addEventListener("keydown", this.imprintEscapeHandler);
+  }
+
+  /**
+   * Removes escape key listener for imprint modal
+   */
+  unbindImprintEscape() {
+    if (!this.imprintEscapeHandler) return;
+    document.removeEventListener("keydown", this.imprintEscapeHandler);
+    this.imprintEscapeHandler = null;
   }
 
   /**

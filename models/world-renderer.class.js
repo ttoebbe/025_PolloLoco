@@ -17,6 +17,7 @@ class WorldRenderer {
     this.clearCanvas();
     this.drawCameraLayer();
     this.drawUiLayer();
+    this.drawCharacterAboveUiIfNeeded();
   }
 
   /**
@@ -56,6 +57,52 @@ class WorldRenderer {
     this.addToMap(this.world.coinBar);
     this.addToMap(this.world.bottleBar);
     if (this.world.endbossNearby) this.addToMap(this.world.endbossBar);
+  }
+
+  /**
+   * Draws the character above UI when overlapping HUD space.
+   */
+  drawCharacterAboveUiIfNeeded() {
+    const uiBottom = this.getUiOverlayBottom();
+    if (!this.isCharacterOverlappingUi(uiBottom)) return;
+    const context = this.world.ctx;
+    context.save();
+    context.beginPath();
+    context.rect(0, 0, this.world.canvas.width, uiBottom);
+    context.clip();
+    context.translate(this.world.cameraX, 0);
+    this.addToMap(this.world.character);
+    context.translate(-this.world.cameraX, 0);
+    context.restore();
+  }
+
+  /**
+   * Returns all currently visible UI bars.
+   * @returns {Array<DrawableObject>} Visible bars.
+   */
+  getVisibleUiBars() {
+    const bars = [this.world.statusBar, this.world.coinBar, this.world.bottleBar];
+    if (this.world.endbossNearby) bars.push(this.world.endbossBar);
+    return bars;
+  }
+
+  /**
+   * Returns the lower edge of the visible HUD bars.
+   * @returns {number} Bottom y coordinate of visible bars.
+   */
+  getUiOverlayBottom() {
+    const bars = this.getVisibleUiBars();
+    if (bars.length === 0) return 0;
+    return Math.max(...bars.map((bar) => bar.y + bar.height));
+  }
+
+  /**
+   * Checks whether character overlaps the UI area.
+   * @param {number} uiBottom - Lower edge of HUD bars.
+   * @returns {boolean} True when overlap exists.
+   */
+  isCharacterOverlappingUi(uiBottom) {
+    return this.world.character.y < uiBottom;
   }
 
   /**

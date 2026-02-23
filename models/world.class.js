@@ -22,6 +22,9 @@ class World {
   throwCooldownMs = 500;
   lastThrowTime = 0;
   activeEnemyContacts = new Set();
+  contactDamageIntervalMs = 500;
+  enemyContactDamageTimes = new Map();
+
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
@@ -128,6 +131,7 @@ class World {
   checkEnemyCollisions() {
     const collidingNow = this.getCollidingEnemies();
     this.handleNewEnemyContacts(collidingNow);
+    this.handleActiveEnemyContacts(collidingNow);
     this.releaseInactiveEnemyContacts(collidingNow);
   }
 
@@ -148,6 +152,14 @@ class World {
     });
   }
 
+  handleActiveEnemyContacts(collidingNow) {
+    collidingNow.forEach((enemy) => {
+      if (!this.activeEnemyContacts.has(enemy)) return;
+      if (!this.character.isCollidingFromSide(enemy)) return;
+      this.handleSideCollisionWithEnemy(enemy);
+    });
+  }
+
   resolveEnemyContact(enemy) {
     if (this.character.isCollidingFromAbove(enemy)) {
       this.handleJumpOnEnemy(enemy);
@@ -164,6 +176,7 @@ class World {
       const enemyExists = this.level.enemies.includes(enemy);
       if (enemyExists && collidingNow.has(enemy)) return;
       this.activeEnemyContacts.delete(enemy);
+      this.enemyContactDamageTimes.delete(enemy);
     });
   }
 
@@ -201,16 +214,31 @@ class World {
    * @param {MovableObject} enemy - The enemy colliding with
    */
   handleSideCollisionWithEnemy(enemy) {
-    if (this.character.isHurt()) return;
-    
-    if (enemy instanceof Endboss) {
-      this.character.hit();
-      this.character.hit(); // Double damage for endboss
-    } else {
-      this.character.hit();
-    }
+    const now = Date.now();
+    if (!this.shouldApplySideContactDamage(enemy, now)) return;
+    this.applyEnemyContactDamage(enemy);
+    this.setSideContactDamageTime(enemy, now);
     this.updateHealthBar();
     window.audioManager?.playCharacterHurt();
+  }
+
+  shouldApplySideContactDamage(enemy, now) {
+    const lastDamageTime = this.enemyContactDamageTimes.get(enemy);
+    if (lastDamageTime === undefined) return true;
+    return now - lastDamageTime >= this.contactDamageIntervalMs;
+  }
+
+  setSideContactDamageTime(enemy, now) {
+    this.enemyContactDamageTimes.set(enemy, now);
+  }
+
+  applyEnemyContactDamage(enemy) {
+    if (!(enemy instanceof Endboss)) {
+      this.character.hit();
+      return;
+    }
+    this.character.hit();
+    this.character.hit();
   }
 
   /**
@@ -405,6 +433,7 @@ class World {
     this.cameraX = 0;
     this.throwableObjects = [];
     this.activeEnemyContacts = new Set();
+    this.enemyContactDamageTimes = new Map();
     this.lastThrowTime = 0;
     this.collectedCoins = 0;
     this.collectedBottles = 0;

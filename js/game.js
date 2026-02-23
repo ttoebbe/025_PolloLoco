@@ -81,7 +81,14 @@ function setArrowKeyState(eventKey, isPressed) {
   if (eventKey === "ArrowDown") keyboard.down = isPressed;
 }
 
+function isRepeatedActionKey(event) {
+  if (!event.repeat) return false;
+  if (event.key === " ") return true;
+  return event.key.toLowerCase() === "d";
+}
+
 function handleKeyDown(event) {
+  if (isRepeatedActionKey(event)) return;
   markAudioActivity();
   setArrowKeyState(event.key, true);
   if (event.key === " ") {

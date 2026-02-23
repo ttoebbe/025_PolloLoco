@@ -21,6 +21,7 @@ class World {
   endbossDefeatedTime = 0;
   throwCooldownMs = 500;
   lastThrowTime = 0;
+  activeEnemyContacts = new Set();
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
@@ -125,15 +126,44 @@ class World {
   }
 
   checkEnemyCollisions() {
+    const collidingNow = this.getCollidingEnemies();
+    this.handleNewEnemyContacts(collidingNow);
+    this.releaseInactiveEnemyContacts(collidingNow);
+  }
+
+  getCollidingEnemies() {
+    const collidingNow = new Set();
     this.level.enemies.forEach((enemy) => {
       if (!this.character.isColliding(enemy)) return;
       if (enemy.isDead()) return;
-      
-      if (this.character.isCollidingFromAbove(enemy)) {
-        this.handleJumpOnEnemy(enemy);
-      } else if (this.character.isCollidingFromSide(enemy)) {
-        this.handleSideCollisionWithEnemy(enemy);
-      }
+      collidingNow.add(enemy);
+    });
+    return collidingNow;
+  }
+
+  handleNewEnemyContacts(collidingNow) {
+    collidingNow.forEach((enemy) => {
+      if (this.activeEnemyContacts.has(enemy)) return;
+      this.resolveEnemyContact(enemy);
+    });
+  }
+
+  resolveEnemyContact(enemy) {
+    if (this.character.isCollidingFromAbove(enemy)) {
+      this.handleJumpOnEnemy(enemy);
+      this.activeEnemyContacts.add(enemy);
+      return;
+    }
+    if (!this.character.isCollidingFromSide(enemy)) return;
+    this.handleSideCollisionWithEnemy(enemy);
+    this.activeEnemyContacts.add(enemy);
+  }
+
+  releaseInactiveEnemyContacts(collidingNow) {
+    this.activeEnemyContacts.forEach((enemy) => {
+      const enemyExists = this.level.enemies.includes(enemy);
+      if (enemyExists && collidingNow.has(enemy)) return;
+      this.activeEnemyContacts.delete(enemy);
     });
   }
 
@@ -162,12 +192,8 @@ class World {
    * @param {MovableObject} enemy - The enemy being jumped on
    */
   handleJumpOnEnemy(enemy) {
-    if (enemy instanceof Endboss) {
-      this.character.jump(); // Bounce off endboss
-    } else {
-      enemy.hit();
-      this.character.jump();
-    }
+    if (enemy instanceof Endboss) return;
+    enemy.hit();
   }
 
   /**
@@ -378,6 +404,7 @@ class World {
     this.level = createLevel1();
     this.cameraX = 0;
     this.throwableObjects = [];
+    this.activeEnemyContacts = new Set();
     this.lastThrowTime = 0;
     this.collectedCoins = 0;
     this.collectedBottles = 0;

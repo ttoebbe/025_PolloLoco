@@ -85,7 +85,12 @@ class ScreenManager {
    * @returns {string} HTML template string
    */
   getGameOverActionsTemplate() {
-    return `<div class="game-over-actions">${this.getGameOverRestartButtonTemplate()}</div>`;
+    return `
+      <div class="game-over-actions">
+        ${this.getGameOverRestartButtonTemplate()}
+        ${this.getBackToMenuButtonTemplate("game-over-menu-button")}
+      </div>
+    `;
   }
 
   /**
@@ -97,14 +102,36 @@ class ScreenManager {
   }
 
   /**
+   * Returns one endscreen back-to-menu button template
+   * @param {string} buttonId - Button id
+   * @returns {string} HTML template string
+   */
+  getBackToMenuButtonTemplate(buttonId) {
+    return `<button id="${buttonId}" class="game-over-restart-button" type="button">Back to Menu</button>`;
+  }
+
+  /**
    * Returns win screen HTML template
    * @returns {string} HTML template string
    */
   getWinScreenTemplate() {
     return `
-      <div class="screen-content">
+      <div class="screen-content game-over-screen">
         <img src="img/You won, you lost/You Won B.png" alt="You Won" class="screen-image">
-        <button id="restart-button" class="game-over-restart-button">Play Again</button>
+        ${this.getWinActionsTemplate()}
+      </div>
+    `;
+  }
+
+  /**
+   * Returns win action area template
+   * @returns {string} HTML template string
+   */
+  getWinActionsTemplate() {
+    return `
+      <div class="game-over-actions">
+        <button id="restart-button" class="game-over-restart-button" type="button">Play Again</button>
+        ${this.getBackToMenuButtonTemplate("win-menu-button")}
       </div>
     `;
   }
@@ -178,15 +205,16 @@ class ScreenManager {
    * Adds event listeners for game over screen
    */
   addGameOverListeners() {
-    this.bindGameOverButton();
+    this.bindGameOverButtons();
     this.bindGameOverKey();
   }
 
   /**
-   * Binds game over restart button click
+   * Binds game over action buttons
    */
-  bindGameOverButton() {
+  bindGameOverButtons() {
     this.bindButtonClick("game-over-restart-button", () => this.triggerRestart());
+    this.bindButtonClick("game-over-menu-button", () => this.triggerBackToMenu());
   }
 
   /**
@@ -211,9 +239,8 @@ class ScreenManager {
    * Adds event listeners for win screen
    */
   addWinScreenListeners() {
-    const restartButton = document.getElementById("restart-button");
-    if (!restartButton) return;
-    restartButton.addEventListener("click", () => this.triggerRestart());
+    this.bindButtonClick("restart-button", () => this.triggerRestart());
+    this.bindButtonClick("win-menu-button", () => this.triggerBackToMenu());
   }
 
   /**
@@ -355,6 +382,15 @@ class ScreenManager {
     this.removeGameOverListeners();
     const restartEvent = new CustomEvent("gameRestart");
     document.dispatchEvent(restartEvent);
+  }
+
+  /**
+   * Triggers return-to-menu event
+   */
+  triggerBackToMenu() {
+    this.hideScreens();
+    const menuEvent = new CustomEvent("gameBackToMenu");
+    document.dispatchEvent(menuEvent);
   }
 
   /**

@@ -180,6 +180,11 @@ canvas {
     bottom: 18px;
     transform: translateX(-50%);
     z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: calc(100% - 24px);
 }
 
 .button-container {
@@ -452,6 +457,7 @@ body[data-game-state="paused"] #runtime-controls {
 
     .screen-content.game-over-screen .game-over-actions {
         bottom: 12px;
+        gap: 8px;
     }
 }
 

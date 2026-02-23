@@ -18,8 +18,11 @@ function init() {
 }
 
 function startGame() {
-  if (world) return;
-  world = new World(canvas, keyboard);
+  if (!world) {
+    world = new World(canvas, keyboard);
+    return;
+  }
+  world.restart();
 }
 
 function setGameUiState(state) {
@@ -162,6 +165,13 @@ document.addEventListener("gameRestart", () => {
 document.addEventListener("gameEnded", () => {
   setGameUiState("ended");
   window.audioManager?.hardStopAll();
+});
+
+document.addEventListener("gameBackToMenu", () => {
+  setGameUiState("start");
+  resetKeyboardState();
+  window.audioManager?.hardStopAll();
+  screenManager.showStartScreen();
 });
 
 window.addEventListener("keydown", handleKeyDown);

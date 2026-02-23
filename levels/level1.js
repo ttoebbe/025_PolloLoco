@@ -39,6 +39,21 @@ const BACKGROUND_SEGMENTS = [
   [719 * 4, "1"],
 ];
 
+const CHICKEN_SPAWNS = [
+  { type: "normal", x: 360 },
+  { type: "small", x: 520 },
+  { type: "normal", x: 700 },
+  { type: "small", x: 860 },
+  { type: "normal", x: 1040 },
+  { type: "small", x: 1200 },
+  { type: "normal", x: 1380 },
+  { type: "small", x: 1540 },
+  { type: "normal", x: 1720 },
+  { type: "small", x: 1880 },
+  { type: "normal", x: 2060 },
+  { type: "small", x: 2220 },
+];
+
 const level1 = createLevel1();
 
 /**
@@ -56,15 +71,19 @@ function createLevel1() {
 }
 
 function createLevelEnemies() {
-  return [
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Chicken(),
-    new Endboss(),
-  ];
+  const chickens = CHICKEN_SPAWNS.map((spawn) => createChickenBySpawn(spawn));
+  return [...chickens, new Endboss()];
+}
+
+/**
+ * Creates one enemy from one spawn definition.
+ * @param {{type: "normal" | "small", x: number}} spawn - Spawn definition.
+ * @returns {Chicken|SmallChicken} One chicken enemy instance.
+ */
+function createChickenBySpawn(spawn) {
+  const enemy = spawn.type === "small" ? new SmallChicken() : new Chicken();
+  enemy.x = spawn.x;
+  return enemy;
 }
 
 function createLevelClouds() {

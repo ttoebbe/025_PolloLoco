@@ -155,6 +155,7 @@ class World {
   handleActiveEnemyContacts(collidingNow) {
     collidingNow.forEach((enemy) => {
       if (!this.activeEnemyContacts.has(enemy)) return;
+      if (enemy.isDead()) return;
       if (!this.character.isCollidingFromSide(enemy)) return;
       this.handleSideCollisionWithEnemy(enemy);
     });
@@ -207,6 +208,7 @@ class World {
   handleJumpOnEnemy(enemy) {
     if (enemy instanceof Endboss) return;
     enemy.hit();
+    this.character.triggerStompRebound();
   }
 
   /**

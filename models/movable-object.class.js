@@ -17,14 +17,42 @@ class MovableObject extends DrawableObject {
   }
 
   applyGravity() {
-    if (MovableObject.gameStateManager) {
-      MovableObject.gameStateManager.registerInterval(() => {
-        if (this.isAboveGround() || this.speedY > 0) {
-          this.y -= this.speedY;
-          this.speedY -= this.acceleration;
-        }
-      }, 1000 / 25);
-    }
+    if (!MovableObject.gameStateManager) return;
+    MovableObject.gameStateManager.registerInterval(() => {
+      this.updateVerticalMovement();
+    }, 1000 / 25);
+  }
+
+  updateVerticalMovement() {
+    if (!this.shouldUpdateVerticalMovement()) return;
+    this.applyVerticalStep();
+    this.snapToGround();
+  }
+
+  shouldUpdateVerticalMovement() {
+    if (this instanceof ThrowableObject) return this.isAboveGround() || this.speedY !== 0;
+    if (this.isAboveGround() || this.speedY > 0) return true;
+    return this.isBelowGround();
+  }
+
+  applyVerticalStep() {
+    this.y -= this.speedY;
+    this.speedY -= this.acceleration;
+  }
+
+  isBelowGround() {
+    return this.y > this.getGroundY();
+  }
+
+  snapToGround() {
+    if (this instanceof ThrowableObject) return;
+    if (!this.isBelowGround()) return;
+    this.y = this.getGroundY();
+    this.speedY = 0;
+  }
+
+  getGroundY() {
+    return 180;
   }
 
   isAboveGround() {
@@ -116,7 +144,7 @@ class MovableObject extends DrawableObject {
   }
 
   jump() {
-    this.speedY = 18;
+    this.speedY = 20;
     this.world.keyboard.space = false; // Reset after jump
   }
 }

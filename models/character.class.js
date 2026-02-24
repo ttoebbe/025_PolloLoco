@@ -72,7 +72,11 @@ class Character extends MovableObject {
   jumpDownFrameIndex = 0;
   jumpUpImages = this.IMAGES_JUMPING.slice(0, 4);
   jumpDownImages = this.IMAGES_JUMPING.slice(4);
-  //   currentImageIndex = 0;
+  isAirPhaseActive = false;
+  airPhaseStartX = 0;
+  maxAirDriftPx = 0;
+  airDriftBufferPx = 50;
+
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -100,6 +104,7 @@ class Character extends MovableObject {
    */
   startMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
+      this.updateAirPhaseState();
       this.handleHorizontalMovement();
       this.handleJumpInput();
       this.updateWalkingSound();
@@ -121,6 +126,7 @@ class Character extends MovableObject {
   handleMoveRight() {
     if (!this.world.keyboard.right || this.x >= this.world.level.levelEndX) return;
     this.moveRight();
+    this.clampAirDrift();
     this.otherDirection = false;
     this.markAudioActivity();
   }
@@ -131,6 +137,7 @@ class Character extends MovableObject {
   handleMoveLeft() {
     if (!this.world.keyboard.left || this.x <= 0) return;
     this.moveLeft();
+    this.clampAirDrift();
     this.otherDirection = true;
     this.markAudioActivity();
   }
@@ -142,8 +149,18 @@ class Character extends MovableObject {
     if (!this.world.keyboard.space || this.isAboveGround()) return;
     this.jump();
     this.startJumpCycle();
+    this.startAirPhase();
     this.playJumpSound();
     this.markAudioActivity();
+  }
+
+  /**
+   * Triggers rebound after stomping an enemy.
+   */
+  triggerStompRebound() {
+    this.speedY = 6.5;
+    this.startJumpCycle();
+    this.startAirPhase();
   }
 
   /**
@@ -273,6 +290,52 @@ class Character extends MovableObject {
     this.jumpPhase = "none";
     this.jumpUpFrameIndex = 0;
     this.jumpDownFrameIndex = 0;
+  }
+
+  /**
+   * Keeps air-phase state in sync with ground contact.
+   */
+  updateAirPhaseState() {
+    if (this.isAirborneForDriftControl()) return;
+    this.endAirPhase();
+  }
+
+  /**
+   * Checks if character is currently airborne for drift control.
+   * @returns {boolean} True when drift clamp should stay active.
+   */
+  isAirborneForDriftControl() {
+    if (this.isAboveGround()) return true;
+    return this.speedY > 0;
+  }
+
+  /**
+   * Starts a new air-phase and stores drift boundaries.
+   */
+  startAirPhase() {
+    this.isAirPhaseActive = true;
+    this.airPhaseStartX = this.x;
+    this.maxAirDriftPx = this.width + this.airDriftBufferPx;
+  }
+
+  /**
+   * Ends current air-phase and clears drift boundaries.
+   */
+  endAirPhase() {
+    if (!this.isAirPhaseActive) return;
+    this.isAirPhaseActive = false;
+    this.airPhaseStartX = 0;
+    this.maxAirDriftPx = 0;
+  }
+
+  /**
+   * Clamps horizontal movement during an active air-phase.
+   */
+  clampAirDrift() {
+    if (!this.isAirPhaseActive) return;
+    const minX = this.airPhaseStartX - this.maxAirDriftPx;
+    const maxX = this.airPhaseStartX + this.maxAirDriftPx;
+    this.x = Math.max(minX, Math.min(this.x, maxX));
   }
 
   /**

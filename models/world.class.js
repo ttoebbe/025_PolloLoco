@@ -281,12 +281,11 @@ class World {
    * @param {ThrowableObject} bottle - The bottle that caused the hit
    */
   handleBottleEnemyHit(enemy, bottle) {
-    enemy.hit();
     bottle.startSplash();
     window.audioManager?.playBottleBreak();
-    if (!(enemy instanceof Endboss)) return;
-    enemy.applyStun();
-    this.updateEndbossBar();
+    if (!(enemy instanceof Endboss)) return enemy.hit();
+    const didDamage = enemy.tryTakeBottleHit();
+    if (didDamage) this.updateEndbossBar();
   }
 
   /**

@@ -7,11 +7,17 @@ class Endboss extends MovableObject {
   speed = 0;
   targetCharacter = null;
   isMoving = false;
-  stunDurationMs = 500;
+  bottleDamageCooldownMs = 900;
+  lastBottleDamageTime = 0;
+  stunDurationMs = 220;
+  stunCooldownMs = 1800;
+  lastBottleStunTime = 0;
   stunnedUntil = 0;
   chaseActivated = false;
   chaseActivationDistance = 600;
-  baseSpeedFactor = 0.3;
+  baseSpeedFactor = 0.35;
+  enragedSpeedFactor = 0.48;
+  enrageThresholdEnergy = 5;
   chaseStopDistance = -3;
   isDying = false;
   deathTime = 0;
@@ -202,12 +208,64 @@ class Endboss extends MovableObject {
    */
   executeChaseMovement() {
     const direction = this.getChaseDirection();
-    const chaseSpeed = this.targetCharacter.speed * this.baseSpeedFactor;
+    const speedFactor = this.getCurrentSpeedFactor();
+    const chaseSpeed = this.targetCharacter.speed * speedFactor;
     const step = this.getChaseStep(chaseSpeed);
     if (direction === 0 || step === 0) return this.stopMovement();
     this.speed = chaseSpeed;
     this.isMoving = true;
     this.moveInDirection(direction, step);
+  }
+
+  /**
+   * Checks whether endboss is in enraged movement phase.
+   * @returns {boolean} True when health threshold is reached.
+   */
+  isEnraged() {
+    return this.energy <= this.enrageThresholdEnergy && !this.isDead();
+  }
+
+  /**
+   * Returns current chase speed factor based on phase.
+   * @returns {number} Movement speed factor.
+   */
+  getCurrentSpeedFactor() {
+    return this.isEnraged() ? this.enragedSpeedFactor : this.baseSpeedFactor;
+  }
+
+  /**
+   * Checks if bottle can currently deal damage.
+   * @param {number} now - Current timestamp.
+   * @returns {boolean} True when damage window is open.
+   */
+  isBottleDamageWindowOpen(now) {
+    if (!this.chaseActivated) return false;
+    return now - this.lastBottleDamageTime >= this.bottleDamageCooldownMs;
+  }
+
+  /**
+   * Checks whether a new bottle stun can be applied.
+   * @param {number} now - Current timestamp.
+   * @returns {boolean} True when stun cooldown elapsed.
+   */
+  canApplyBottleStun(now) {
+    return now - this.lastBottleStunTime >= this.stunCooldownMs;
+  }
+
+  /**
+   * Applies a bottle hit using damage and stun windows.
+   * @returns {boolean} True if damage was applied.
+   */
+  tryTakeBottleHit() {
+    const now = Date.now();
+    if (this.isDead() || !this.isBottleDamageWindowOpen(now)) return false;
+    this.lastBottleDamageTime = now;
+    this.hit();
+    if (!this.isDead() && this.canApplyBottleStun(now)) {
+      this.lastBottleStunTime = now;
+      this.applyStun();
+    }
+    return true;
   }
 
   getChaseDirection() {

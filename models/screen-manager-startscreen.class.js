@@ -62,11 +62,39 @@ ScreenManager.prototype.getImprintHeaderTemplate = function getImprintHeaderTemp
 
 ScreenManager.prototype.getImprintContentTemplate = function getImprintContentTemplate() {
   return `
-    <div class="imprint-content">
-      <p><strong>Information according to Section 5 TMG</strong></p>
-      <p>Thomas Toebbe-Hoemke<br>Westerodener Straße 33<br> 49586 Merzen<br>Germany</p>
-      <p><strong>Contact</strong><br>Email: toebbe.thomas@outlook.de</p>
-      <p><strong>Responsible for content according to Section 55 para. 2 RStV</strong><br>Thomas Toebbe-Hoemke<br>Westerodener Straße 33<br> 49586 Merzen<br>Germany</p>
-    </div>
+<div class="imprint-content">
+  <p><strong>Impressum</strong></p>
+
+  <p><strong>Angaben gemäß § 5 DDG (ehemals § 5 TMG)</strong></p>
+  <p>
+    Thomas Toebbe-Hoemke<br>
+    Westerodener Straße 33<br>
+    49586 Merzen<br>
+    Deutschland
+  </p>
+
+  <p><strong>Kontakt</strong><br>
+    E-Mail: <a href="mailto:toebbe.thomas@outlook.de">toebbe.thomas@outlook.de</a><br>
+  </p>
+
+  <p><strong>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</strong><br>
+    Thomas Toebbe-Hoemke<br>
+    Westerodener Straße 33<br>
+    49586 Merzen<br>
+    Deutschland
+  </p>
+
+  <p><strong>Hinweis auf EU‑Streitschlichtung</strong><br>
+    Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+    <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">
+      https://ec.europa.eu/consumers/odr
+    </a>.
+  </p>
+
+  <p><strong>Verbraucherstreitbeilegung / Universalschlichtungsstelle</strong><br>
+    Ich bin nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer
+    Verbraucherschlichtungsstelle teilzunehmen.
+  </p>
+</div>
   `;
 };

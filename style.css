@@ -600,25 +600,17 @@ body[data-game-state="paused"] #runtime-controls {
 
 @media (max-height: 480px) {
     :root {
-        --page-padding: 10px;
+        --page-padding: 0px;
         --ui-space: 0px;
     }
 
     body {
-        overflow: auto;
-        align-items: flex-start;
-        padding-top: 8px;
-        padding-bottom: 8px;
+        overflow: hidden;
+        align-items: center;
     }
 
     .game-title {
         display: none;
-    }
-
-    .canvas-shell {
-        height: 100dvh;
-        max-height: 100dvh;
-        width: min(100vw, calc(100dvh * 1.5));
     }
 
     .mobile-controls-group {

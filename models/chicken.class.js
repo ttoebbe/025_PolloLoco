@@ -6,6 +6,7 @@ class Chicken extends MovableObject {
   energy = 1;
   isDying = false;
   deathTime = 0;
+  hasDeathGroundOffset = false;
   
   IMAGES_WALKING = [
     "img/3_enemies_chicken/chicken_normal/1_walk/1_w.png",
@@ -68,8 +69,18 @@ class Chicken extends MovableObject {
   hit() {
     if (this.isDead()) return;
     this.energy = 0;
+    this.applyDeathGroundOffset();
     this.deathTime = new Date().getTime();
     this.playDeathSound();
+  }
+
+  /**
+   * Applies one-time vertical offset for death ground alignment.
+   */
+  applyDeathGroundOffset() {
+    if (this.hasDeathGroundOffset) return;
+    this.y += 20;
+    this.hasDeathGroundOffset = true;
   }
 
   /**

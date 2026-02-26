@@ -317,9 +317,9 @@ class World {
   updateEndbossBar() {
     let endboss = this.level.enemies.find(enemy => enemy instanceof Endboss);
     if (endboss) {
-      let percentage = (endboss.energy / 10) * 100;
+      let percentage = (endboss.energy / endboss.maxEnergy) * 100;
       this.endbossBar.setPercentage(percentage);
-      this.endbossBar.setStock(endboss.energy, 10);
+      this.endbossBar.setStock(endboss.energy, endboss.maxEnergy);
     }
   }
 
@@ -458,7 +458,7 @@ class World {
     this.updateCoinBar();
     this.updateBottleBar();
     this.endbossBar.setPercentage(100);
-    this.endbossBar.setStock(10, 10);
+    this.endbossBar.setStock(100, 100);
   }
 
   /**

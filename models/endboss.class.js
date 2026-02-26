@@ -3,7 +3,9 @@ class Endboss extends MovableObject {
   width = 300;
   y = 50;
   collisionOffsets = { left: 90, right: 8, top: 20 };
-  energy = 10;
+  maxEnergy = 100;
+  energy = 100;
+  bottleHitDamage = 10;
   speed = 0;
   targetCharacter = null;
   isMoving = false;
@@ -17,7 +19,7 @@ class Endboss extends MovableObject {
   chaseActivationDistance = 600;
   baseSpeedFactor = 0.35;
   enragedSpeedFactor = 0.48;
-  enrageThresholdEnergy = 5;
+  enrageThresholdEnergy = 50;
   chaseStopDistance = -3;
   isDying = false;
   deathTime = 0;
@@ -339,11 +341,11 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Endboss takes 1 damage (1/10 of health)
+   * Endboss takes bottle hit damage.
    */
   hit() {
     if (this.isDead()) return;
-    this.energy -= 1;
+    this.energy -= this.bottleHitDamage;
     this.lastHit = Date.now();
     if (this.energy <= 0) {
       this.energy = 0;

@@ -13,9 +13,9 @@ class EndbossStatusBar extends DrawableObject {
   ];
 
   percentage = 100;
-  currentStock = 10;
-  maxStock = 10;
-  counterLabel = "10/10";
+  currentStock = 100;
+  maxStock = 100;
+  counterLabel = "100/100";
 
   /**
    * Creates Endboss status bar positioned at top right
@@ -28,7 +28,7 @@ class EndbossStatusBar extends DrawableObject {
     this.width = 200;
     this.height = 50;
     this.setPercentage(100);
-    this.setStock(10, 10);
+    this.setStock(100, 100);
   }
 
   /**
@@ -125,10 +125,10 @@ class EndbossStatusBar extends DrawableObject {
    */
   resolveImageIndex() {
     if (this.percentage === 100) return 5;
-    if (this.percentage > 80) return 4;
-    if (this.percentage > 60) return 3;
-    if (this.percentage > 40) return 2;
-    if (this.percentage > 20) return 1;
+    if (this.percentage >= 80) return 4;
+    if (this.percentage >= 60) return 3;
+    if (this.percentage >= 40) return 2;
+    if (this.percentage > 0) return 1;
     return 0;
   }
 }

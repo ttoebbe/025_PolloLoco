@@ -319,6 +319,7 @@ class World {
     if (endboss) {
       let percentage = (endboss.energy / 10) * 100;
       this.endbossBar.setPercentage(percentage);
+      this.endbossBar.setStock(endboss.energy, 10);
     }
   }
 
@@ -327,6 +328,7 @@ class World {
    */
   updateHealthBar() {
     this.statusBar.setPercentage(this.character.energy);
+    this.statusBar.setStock(this.character.energy, 100);
   }
 
   /**
@@ -350,19 +352,23 @@ class World {
   updateCoinBar() {
     if (this.totalCoins === 0) {
       this.coinBar.setPercentage(0);
+      this.coinBar.setStock(0, 0);
       return;
     }
-    let percentage = (this.collectedCoins / this.totalCoins) * 100;
+    const percentage = (this.collectedCoins / this.totalCoins) * 100;
     this.coinBar.setPercentage(percentage);
+    this.coinBar.setStock(this.collectedCoins, this.totalCoins);
   }
 
   updateBottleBar() {
     if (this.maxBottles === 0) {
       this.bottleBar.setPercentage(0);
+      this.bottleBar.setStock(0, 0);
       return;
     }
-    let percentage = (this.collectedBottles / this.maxBottles) * 100;
+    const percentage = (this.collectedBottles / this.maxBottles) * 100;
     this.bottleBar.setPercentage(percentage);
+    this.bottleBar.setStock(this.collectedBottles, this.maxBottles);
   }
 
   draw() {
@@ -452,6 +458,7 @@ class World {
     this.updateCoinBar();
     this.updateBottleBar();
     this.endbossBar.setPercentage(100);
+    this.endbossBar.setStock(10, 10);
   }
 
   /**

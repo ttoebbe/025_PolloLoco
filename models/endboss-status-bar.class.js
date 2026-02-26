@@ -13,6 +13,9 @@ class EndbossStatusBar extends DrawableObject {
   ];
 
   percentage = 100;
+  currentStock = 10;
+  maxStock = 10;
+  counterLabel = "10/10";
 
   /**
    * Creates Endboss status bar positioned at top right
@@ -25,6 +28,7 @@ class EndbossStatusBar extends DrawableObject {
     this.width = 200;
     this.height = 50;
     this.setPercentage(100);
+    this.setStock(10, 10);
   }
 
   /**
@@ -32,9 +36,87 @@ class EndbossStatusBar extends DrawableObject {
    * @param {number} percentage - Health percentage (0-100)
    */
   setPercentage(percentage) {
-    this.percentage = percentage;
-    let path = this.IMAGES[this.resolveImageIndex()];
+    this.percentage = this.normalizePercentage(percentage);
+    const path = this.IMAGES[this.resolveImageIndex()];
     this.img = this.imageCache[path];
+  }
+
+  /**
+   * Updates exact endboss health values for label rendering.
+   * @param {number} currentStock - Current health value.
+   * @param {number} maxStock - Maximum health value.
+   */
+  setStock(currentStock, maxStock) {
+    this.maxStock = this.normalizeMaxStock(maxStock);
+    this.currentStock = this.normalizeCurrentStock(currentStock, this.maxStock);
+    this.counterLabel = this.createCounterLabel();
+  }
+
+  /**
+   * Draws endboss bar plus exact value label.
+   * @param {CanvasRenderingContext2D} context - Canvas render context.
+   */
+  draw(context) {
+    super.draw(context);
+    this.drawCounter(context);
+  }
+
+  /**
+   * Draws centered counter text on the endboss bar.
+   * @param {CanvasRenderingContext2D} context - Canvas render context.
+   */
+  drawCounter(context) {
+    const textX = this.x + this.width / 2;
+    const textY = this.y + this.height / 2;
+    context.save();
+    context.font = "bold 20px Arial";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.lineWidth = 4;
+    context.strokeStyle = "rgba(0, 0, 0, 0.75)";
+    context.fillStyle = "#ffffff";
+    context.strokeText(this.counterLabel, textX, textY);
+    context.fillText(this.counterLabel, textX, textY);
+    context.restore();
+  }
+
+  /**
+   * Normalizes bar percentage to valid bounds.
+   * @param {number} percentage - Raw percentage value.
+   * @returns {number} Clamped value between 0 and 100.
+   */
+  normalizePercentage(percentage) {
+    const roundedPercentage = Math.round(percentage || 0);
+    return Math.max(0, Math.min(roundedPercentage, 100));
+  }
+
+  /**
+   * Normalizes max stock to a non-negative integer.
+   * @param {number} maxStock - Raw max stock value.
+   * @returns {number} Non-negative max stock.
+   */
+  normalizeMaxStock(maxStock) {
+    return Math.max(0, Math.round(maxStock || 0));
+  }
+
+  /**
+   * Normalizes current stock within valid bounds.
+   * @param {number} currentStock - Raw current stock value.
+   * @param {number} maxStock - Normalized max stock value.
+   * @returns {number} Clamped current stock.
+   */
+  normalizeCurrentStock(currentStock, maxStock) {
+    const roundedStock = Math.round(currentStock || 0);
+    return Math.max(0, Math.min(roundedStock, maxStock));
+  }
+
+  /**
+   * Creates UI label from normalized stock values.
+   * @returns {string} Stock label in current/max format.
+   */
+  createCounterLabel() {
+    if (this.maxStock <= 0) return "0/0";
+    return `${this.currentStock}/${this.maxStock}`;
   }
 
   /**

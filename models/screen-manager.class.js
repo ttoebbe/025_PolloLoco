@@ -1,7 +1,19 @@
 /**
  * Manages game overlay screens (Game Over, Win Screen)
  */
-class ScreenManager {
+const IMPRINT_CONTENT_TEMPLATE = `
+<div class="imprint-content">
+  <p><strong>Impressum</strong></p>
+  <p><strong>Angaben gem&auml;&szlig; &sect; 5 DDG (ehemals &sect; 5 TMG)</strong></p>
+  <p>Thomas Toebbe-Hoemke<br>Westerodener Stra&szlig;e 33<br>49586 Merzen<br>Deutschland</p>
+  <p><strong>Kontakt</strong><br>E-Mail: <a href="mailto:toebbe.thomas@outlook.de">toebbe.thomas@outlook.de</a><br></p>
+  <p><strong>Verantwortlich f&uuml;r den Inhalt nach &sect; 18 Abs. 2 MStV</strong><br>Thomas Toebbe-Hoemke<br>Westerodener Stra&szlig;e 33<br>49586 Merzen<br>Deutschland</p>
+  <p><strong>Hinweis auf EU-Streitschlichtung</strong><br>Die Europ&auml;ische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr</a>.</p>
+  <p><strong>Verbraucherstreitbeilegung / Universalschlichtungsstelle</strong><br>Ich bin nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+</div>
+`;
+
+export default class ScreenManager {
   /**
    * Creates a new ScreenManager instance
    */
@@ -150,6 +162,97 @@ class ScreenManager {
         <img src="img/9_intro_outro_screens/start/startscreen_2.png" alt="Start Screen" class="screen-image startscreen-image">
       </div>
     `;
+  }
+
+  /**
+   * Returns top-right buttons wrapper template.
+   * @returns {string} HTML template string
+   */
+  getTopRightButtonsTemplate() {
+    return `
+      <div class="button-container top-right-buttons">
+        ${this.getTopRightButtonRowTemplate()}
+        ${this.getControlsInfoTemplate()}
+      </div>
+    `;
+  }
+
+  /**
+   * Returns top-right button row template.
+   * @returns {string} HTML template string
+   */
+  getTopRightButtonRowTemplate() {
+    return `
+      <div class="top-right-button-row">
+        ${this.getStartButtonTemplate()}
+        ${this.getMuteButtonTemplate()}
+        ${this.getFullscreenButtonTemplate()}
+        ${this.getControlsButtonTemplate()}
+        ${this.getImpressumButtonTemplate()}
+      </div>
+    `;
+  }
+
+  /**
+   * Returns controls info template.
+   * @returns {string} HTML template string
+   */
+  getControlsInfoTemplate() {
+    return `
+      <div id="controls-info" class="startscreen-info hidden" aria-live="polite">
+        Keyboard: <br>
+        Left/Right Arrow: Move <br>
+        Space: Jump <br>
+        D: Throw
+      </div>
+    `;
+  }
+
+  /**
+   * Returns imprint modal template.
+   * @returns {string} HTML template string
+   */
+  getImprintModalTemplate() {
+    return `
+      <div id="imprint-modal" class="imprint-modal hidden" aria-hidden="true">
+        <div id="imprint-backdrop" class="imprint-backdrop"></div>
+        ${this.getImprintDialogTemplate()}
+      </div>
+    `;
+  }
+
+  /**
+   * Returns imprint dialog template.
+   * @returns {string} HTML template string
+   */
+  getImprintDialogTemplate() {
+    return `
+      <section class="imprint-dialog" role="dialog" aria-modal="true" aria-labelledby="imprint-title">
+        ${this.getImprintHeaderTemplate()}
+        ${this.getImprintContentTemplate()}
+      </section>
+    `;
+  }
+
+  /**
+   * Returns imprint dialog header template.
+   * @returns {string} HTML template string
+   */
+  getImprintHeaderTemplate() {
+    return `
+      <header class="imprint-header">
+        <h2 id="imprint-title">Imprint</h2>
+        <button id="imprint-close" class="imprint-close-button" type="button" aria-label="Close imprint">Close</button>
+      </header>
+    `;
+  }
+
+  /**
+   * Returns imprint dialog content template.
+   * @returns {string} HTML template string
+   */
+  getImprintContentTemplate() {
+    return IMPRINT_CONTENT_TEMPLATE;
   }
 
   /**
@@ -448,6 +551,8 @@ class ScreenManager {
     document.dispatchEvent(startEvent);
   }
 }
+
+window.ScreenManager = ScreenManager;
 
 
 

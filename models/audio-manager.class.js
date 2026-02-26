@@ -3,7 +3,7 @@
  */
 const AUDIO_MUTE_STORAGE_KEY = "pollo-loco-audio-muted";
 
-class AudioManager {
+export default class AudioManager {
   /**
    * Creates a new audio manager instance.
    */
@@ -113,6 +113,76 @@ class AudioManager {
     this.addSound("chickenDead", "audio/chickenhurt.wav");
     this.addSound("endbossHurt", "audio/endbosshurt.wav");
     this.addSound("endbossDead", "audio/endbossdead.wav");
+  }
+
+  /**
+   * Plays jump effect.
+   */
+  playJump() {
+    this.playSound("jump");
+  }
+
+  /**
+   * Plays throw effect.
+   */
+  playThrow() {
+    this.playSound("throw", 500);
+  }
+
+  /**
+   * Plays bottle break effect.
+   */
+  playBottleBreak() {
+    this.playSound("bottleBreak");
+  }
+
+  /**
+   * Plays coin collect effect.
+   */
+  playCoinCollect() {
+    this.playSound("coinCollect");
+  }
+
+  /**
+   * Plays bottle collect effect.
+   */
+  playBottleCollect() {
+    this.playSound("bottleCollect");
+  }
+
+  /**
+   * Plays character hurt effect.
+   */
+  playCharacterHurt() {
+    this.playSound("characterHurt", 200);
+  }
+
+  /**
+   * Plays character dead effect.
+   */
+  playCharacterDead() {
+    this.playSound("characterDead");
+  }
+
+  /**
+   * Plays chicken dead effect.
+   */
+  playChickenDead() {
+    this.playSound("chickenDead");
+  }
+
+  /**
+   * Plays endboss hurt effect.
+   */
+  playEndbossHurt() {
+    this.playSound("endbossHurt", 200);
+  }
+
+  /**
+   * Plays endboss dead effect.
+   */
+  playEndbossDead() {
+    this.playSound("endbossDead");
   }
 
   /**
@@ -368,3 +438,5 @@ class AudioManager {
   }
 
 }
+
+window.AudioManager = AudioManager;

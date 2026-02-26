@@ -75,7 +75,7 @@ class Character extends MovableObject {
   isAirPhaseActive = false;
   airPhaseStartX = 0;
   maxAirDriftPx = 0;
-  airDriftBufferPx = 50;
+  airDriftBufferPx = 500;
 
 
   constructor() {

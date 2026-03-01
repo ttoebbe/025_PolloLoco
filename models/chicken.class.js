@@ -1,10 +1,13 @@
 /**
  * Represents the chicken.
  */
+const CHICKEN_HEIGHT = 68;
+const CHICKEN_ASPECT_RATIO = 248 / 243;
+
 class Chicken extends MovableObject {
   y = 360;
-  height = 60;
-  width = 80;
+  height = CHICKEN_HEIGHT;
+  width = Math.round(CHICKEN_HEIGHT * CHICKEN_ASPECT_RATIO);
   collisionOffsets = { left: 2, right: 2, top: 4 };
   energy = 1;
   isDying = false;

@@ -1,10 +1,15 @@
 /**
  * Represents the small chicken.
  */
+const SMALL_CHICKEN_HEIGHT = 40;
+const SMALL_CHICKEN_ASPECT_RATIO = 236 / 210;
+const SMALL_CHICKEN_BASE_Y = 370;
+const SMALL_CHICKEN_GROUND_OFFSET = 18;
+
 class SmallChicken extends MovableObject {
-  y = 370;
-  height = 50;
-  width = 60;
+  y = SMALL_CHICKEN_BASE_Y + SMALL_CHICKEN_GROUND_OFFSET;
+  height = SMALL_CHICKEN_HEIGHT;
+  width = Math.round(SMALL_CHICKEN_HEIGHT * SMALL_CHICKEN_ASPECT_RATIO);
   collisionOffsets = { left: 2, right: 2, top: 4 };
   energy = 1;
   isDying = false;

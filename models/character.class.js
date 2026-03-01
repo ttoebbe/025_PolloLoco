@@ -1,3 +1,6 @@
+/**
+ * Represents the character.
+ */
 class Character extends MovableObject {
   height = 250;
   y = 80;
@@ -78,6 +81,9 @@ class Character extends MovableObject {
   airDriftBufferPx = 500;
 
 
+  /**
+   * Creates a new Character instance.
+   */
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);

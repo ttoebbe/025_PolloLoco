@@ -1,3 +1,6 @@
+/**
+ * Represents the endboss.
+ */
 class Endboss extends MovableObject {
   height = 400;
   width = 300;
@@ -47,6 +50,9 @@ class Endboss extends MovableObject {
     "img/4_enemie_boss_chicken/5_dead/G26.png",
   ];
 
+  /**
+   * Creates a new Endboss instance.
+   */
   constructor() {
     super().loadImage("img/4_enemie_boss_chicken/1_walk/G1.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -66,6 +72,11 @@ class Endboss extends MovableObject {
     this.registerAnimationLoop(gameStateManager);
   }
 
+  /**
+   * Register Movement Loop.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   * @returns {*} Computed result value.
+   */
   registerMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (!this.isDead()) return this.updateChaseMovement();
@@ -73,16 +84,27 @@ class Endboss extends MovableObject {
     }, 1000 / 60);
   }
 
+  /**
+   * Register Animation Loop.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   */
   registerAnimationLoop(gameStateManager) {
     gameStateManager.registerInterval(() => this.updateAnimationFrame(), 200);
   }
 
+  /**
+   * Updates animation Frame.
+   * @returns {*} Computed result value.
+   */
   updateAnimationFrame() {
     if (this.isDead()) return this.playDeathFrame();
     if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
     if (this.isMoving) this.playAnimation(this.IMAGES_WALKING);
   }
 
+  /**
+   * Play Death Frame.
+   */
   playDeathFrame() {
     this.playDeathAnimation();
     this.stopMovement();
@@ -270,6 +292,10 @@ class Endboss extends MovableObject {
     return true;
   }
 
+  /**
+   * Returns chase Direction.
+   * @returns {*} Computed result value.
+   */
   getChaseDirection() {
     const selfBounds = this.getCollisionBounds();
     const targetBounds = this.targetCharacter.getCollisionBounds();
@@ -278,22 +304,41 @@ class Endboss extends MovableObject {
     return Math.sign(targetCenterX - selfCenterX);
   }
 
+  /**
+   * Returns chase Step.
+   * @param {*} chaseSpeed - Value for chase Speed.
+   * @returns {*} Computed result value.
+   */
   getChaseStep(chaseSpeed) {
     const horizontalGap = this.getHorizontalGapToTargetBounds();
     const remainingDistance = Math.max(0, horizontalGap - this.chaseStopDistance);
     return Math.min(chaseSpeed, remainingDistance);
   }
 
+  /**
+   * Move In Direction.
+   * @param {*} direction - Value for direction.
+   * @param {*} step - Value for step.
+   * @returns {*} Computed result value.
+   */
   moveInDirection(direction, step) {
     if (direction < 0) return this.moveLeftStep(step);
     this.moveRightStep(step);
   }
 
+  /**
+   * Move Left Step.
+   * @param {*} step - Value for step.
+   */
   moveLeftStep(step) {
     this.x -= step;
     this.otherDirection = false;
   }
 
+  /**
+   * Move Right Step.
+   * @param {*} step - Value for step.
+   */
   moveRightStep(step) {
     this.x += step;
     this.otherDirection = true;
@@ -310,6 +355,10 @@ class Endboss extends MovableObject {
     this.advanceDeathAnimation(now);
   }
 
+  /**
+   * Starts death Animation.
+   * @param {*} now - Value for now.
+   */
   startDeathAnimation(now) {
     this.isDying = true;
     this.deathAnimationIndex = 0;
@@ -318,10 +367,20 @@ class Endboss extends MovableObject {
     this.setDeathFrame();
   }
 
+  /**
+   * Checks whether next Death Frame Ready is true.
+   * @param {*} now - Value for now.
+   * @returns {boolean} True when the condition is met.
+   */
   isNextDeathFrameReady(now) {
     return now - this.lastDeathFrameTime >= this.deathFrameDuration;
   }
 
+  /**
+   * Advance Death Animation.
+   * @param {*} now - Value for now.
+   * @returns {*} Computed result value.
+   */
   advanceDeathAnimation(now) {
     this.lastDeathFrameTime = now;
     this.deathAnimationIndex++;
@@ -329,12 +388,19 @@ class Endboss extends MovableObject {
     this.setDeathFrame();
   }
 
+  /**
+   * Finish Death Animation.
+   */
   finishDeathAnimation() {
     this.deathAnimationIndex = this.IMAGES_DEAD.length - 1;
     this.deathAnimationFinished = true;
     this.setDeathFrame();
   }
 
+  /**
+   * Sets death Frame.
+   * @param {number} index - Value for index.
+   */
   setDeathFrame(index = this.deathAnimationIndex) {
     let path = this.IMAGES_DEAD[index];
     this.img = this.imageCache[path];

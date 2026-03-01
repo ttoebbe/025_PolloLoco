@@ -13,6 +13,9 @@ const IMPRINT_CONTENT_TEMPLATE = `
 </div>
 `;
 
+/**
+ * Represents the screen manager.
+ */
 export default class ScreenManager {
   /**
    * Creates a new ScreenManager instance

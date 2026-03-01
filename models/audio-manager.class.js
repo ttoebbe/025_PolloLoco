@@ -3,6 +3,9 @@
  */
 const AUDIO_MUTE_STORAGE_KEY = "pollo-loco-audio-muted";
 
+/**
+ * Represents the audio manager.
+ */
 export default class AudioManager {
   /**
    * Creates a new audio manager instance.

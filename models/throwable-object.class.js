@@ -1,3 +1,6 @@
+/**
+ * Represents the throwable object.
+ */
 class ThrowableObject extends MovableObject {
   collisionOffsets = { left: 8, right: 8, top: 8 };
   groundY = 360;
@@ -19,6 +22,12 @@ class ThrowableObject extends MovableObject {
     "img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png",
   ];
 
+  /**
+   * Creates a new ThrowableObject instance.
+   * @param {number} x - Horizontal position.
+   * @param {number} y - Vertical position.
+   * @param {boolean} isThrownLeft - Boolean flag for is Thrown Left.
+   */
   constructor(x, y, isThrownLeft) {
     super().loadImage(this.rotationImages[0]);
     this.loadImages(this.rotationImages);

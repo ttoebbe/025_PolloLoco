@@ -1,3 +1,6 @@
+/**
+ * Represents the cloud.
+ */
 class Cloud extends MovableObject {
   y = 20;
   height = 250;

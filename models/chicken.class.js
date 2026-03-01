@@ -1,3 +1,6 @@
+/**
+ * Represents the chicken.
+ */
 class Chicken extends MovableObject {
   y = 360;
   height = 60;
@@ -16,6 +19,9 @@ class Chicken extends MovableObject {
 
   IMAGES_DEAD = ["img/3_enemies_chicken/chicken_normal/2_dead/dead.png"];
 
+  /**
+   * Creates a new Chicken instance.
+   */
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_normal/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -33,6 +39,10 @@ class Chicken extends MovableObject {
     this.startWalkingAnimation(gameStateManager);
   }
 
+  /**
+   * Starts movement.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   */
   startMovement(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (!this.isDead()) {
@@ -41,6 +51,10 @@ class Chicken extends MovableObject {
     }, 1000 / 60);
   }
 
+  /**
+   * Starts walking Animation.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   */
   startWalkingAnimation(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (this.isDead() && !this.isDying) {

@@ -1,3 +1,6 @@
+/**
+ * Represents the small chicken.
+ */
 class SmallChicken extends MovableObject {
   y = 370;
   height = 50;
@@ -16,6 +19,9 @@ class SmallChicken extends MovableObject {
 
   IMAGES_DEAD = ["img/3_enemies_chicken/chicken_small/2_dead/dead.png"];
 
+  /**
+   * Creates a new SmallChicken instance.
+   */
   constructor() {
     super().loadImage("img/3_enemies_chicken/chicken_small/1_walk/1_w.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -33,12 +39,20 @@ class SmallChicken extends MovableObject {
     this.startWalkingAnimation(gameStateManager);
   }
 
+  /**
+   * Starts movement.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   */
   startMovement(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (!this.isDead()) this.x -= this.speed;
     }, 1000 / 60);
   }
 
+  /**
+   * Starts walking Animation.
+   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   */
   startWalkingAnimation(gameStateManager) {
     gameStateManager.registerInterval(() => {
       if (this.isDead() && !this.isDying) this.playDeathAnimation();

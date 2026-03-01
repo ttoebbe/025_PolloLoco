@@ -1,3 +1,6 @@
+/**
+ * Represents the movable object.
+ */
 class MovableObject extends DrawableObject {
   speed = 0.1;
   otherDirection = false;
@@ -16,6 +19,9 @@ class MovableObject extends DrawableObject {
     MovableObject.gameStateManager = gameStateManager;
   }
 
+  /**
+   * Apply Gravity.
+   */
   applyGravity() {
     if (!MovableObject.gameStateManager) return;
     MovableObject.gameStateManager.registerInterval(() => {
@@ -23,27 +29,44 @@ class MovableObject extends DrawableObject {
     }, 1000 / 25);
   }
 
+  /**
+   * Updates vertical Movement.
+   */
   updateVerticalMovement() {
     if (!this.shouldUpdateVerticalMovement()) return;
     this.applyVerticalStep();
     this.snapToGround();
   }
 
+  /**
+   * Checks whether update Vertical Movement applies.
+   * @returns {boolean} True when the condition is met.
+   */
   shouldUpdateVerticalMovement() {
     if (this instanceof ThrowableObject) return this.isAboveGround() || this.speedY !== 0;
     if (this.isAboveGround() || this.speedY > 0) return true;
     return this.isBelowGround();
   }
 
+  /**
+   * Apply Vertical Step.
+   */
   applyVerticalStep() {
     this.y -= this.speedY;
     this.speedY -= this.acceleration;
   }
 
+  /**
+   * Checks whether below Ground is true.
+   * @returns {boolean} True when the condition is met.
+   */
   isBelowGround() {
     return this.y > this.getGroundY();
   }
 
+  /**
+   * Snap To Ground.
+   */
   snapToGround() {
     if (this instanceof ThrowableObject) return;
     if (!this.isBelowGround()) return;
@@ -51,10 +74,18 @@ class MovableObject extends DrawableObject {
     this.speedY = 0;
   }
 
+  /**
+   * Returns ground Y.
+   * @returns {*} Computed result value.
+   */
   getGroundY() {
     return 180;
   }
 
+  /**
+   * Checks whether above Ground is true.
+   * @returns {boolean} True when the condition is met.
+   */
   isAboveGround() {
     if (this instanceof ThrowableObject) {
       return true;
@@ -63,6 +94,11 @@ class MovableObject extends DrawableObject {
     }
   }
 
+  /**
+   * Checks whether colliding is true.
+   * @param {*} movableObject - Value for movable Object.
+   * @returns {boolean} True when the condition is met.
+   */
   isColliding(movableObject) {
     const selfBounds = this.getCollisionBounds();
     const otherBounds = movableObject.getCollisionBounds();
@@ -106,6 +142,9 @@ class MovableObject extends DrawableObject {
     return selfBounds.bottom <= (otherBounds.top + 30);
   }
 
+  /**
+   * Hit.
+   */
   hit() {
     this.energy -= 5;
     this.lastHit = new Date().getTime();
@@ -116,16 +155,28 @@ class MovableObject extends DrawableObject {
     }
   }
 
+  /**
+   * Checks whether hurt is true.
+   * @returns {boolean} True when the condition is met.
+   */
   isHurt() {
     let timepassed = new Date().getTime() - this.lastHit;
     timepassed = timepassed / 1000; // in seconds
     return timepassed < 1;
   }
 
+  /**
+   * Checks whether dead is true.
+   * @returns {boolean} True when the condition is met.
+   */
   isDead() {
     return this.energy == 0;
   }
 
+  /**
+   * Play Animation.
+   * @param {*} images - Value for images.
+   */
   playAnimation(images) {
     let i = this.currentImageIndex % images.length; // 0, 1, 2, 3, 4, 5 (Modulo-Operator)
     let path = images[i];
@@ -133,16 +184,26 @@ class MovableObject extends DrawableObject {
     this.currentImageIndex++;
   }
 
+  /**
+   * Move Right.
+   * @param {*} pixels - Value for pixels.
+   */
   moveRight(pixels) {
     this.x += this.speed;
     // this.otherDirection = false;
   }
 
+  /**
+   * Move Left.
+   */
   moveLeft() {
     this.x -= this.speed;
     // this.otherDirection = true;
   }
 
+  /**
+   * Jump.
+   */
   jump() {
     this.speedY = 20;
     this.world.keyboard.space = false; // Reset after jump

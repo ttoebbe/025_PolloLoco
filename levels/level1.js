@@ -76,6 +76,10 @@ function createLevel1() {
   );
 }
 
+/**
+ * Creates level Enemies.
+ * @returns {*} Computed result value.
+ */
 function createLevelEnemies() {
   const chickens = CHICKEN_SPAWNS.map((spawn) => createChickenBySpawn(spawn));
   return [...chickens, new Endboss()];
@@ -92,14 +96,28 @@ function createChickenBySpawn(spawn) {
   return enemy;
 }
 
+/**
+ * Creates level Clouds.
+ * @returns {*} Computed result value.
+ */
 function createLevelClouds() {
   return [new Cloud()];
 }
 
+/**
+ * Creates background Objects.
+ * @returns {*} Computed result value.
+ */
 function createBackgroundObjects() {
   return BACKGROUND_SEGMENTS.flatMap(([x, variant]) => createBackgroundSegment(x, variant));
 }
 
+/**
+ * Creates background Segment.
+ * @param {number} x - Horizontal position.
+ * @param {*} variant - Value for variant.
+ * @returns {*} Computed result value.
+ */
 function createBackgroundSegment(x, variant) {
   return [
     new BackgroundObject("img/5_background/layers/air.png", x),
@@ -109,10 +127,18 @@ function createBackgroundSegment(x, variant) {
   ];
 }
 
+/**
+ * Creates level Coins.
+ * @returns {*} Computed result value.
+ */
 function createLevelCoins() {
   return COIN_POSITIONS.map(([x, y]) => new Coin(x, y));
 }
 
+/**
+ * Creates level Bottles.
+ * @returns {*} Computed result value.
+ */
 function createLevelBottles() {
   return BOTTLE_POSITIONS.map(([x, y]) => new Bottle(x, y));
 }

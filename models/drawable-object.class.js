@@ -1,3 +1,6 @@
+/**
+ * Represents the drawable object.
+ */
 class DrawableObject {
   x = 120;
   y = 280;

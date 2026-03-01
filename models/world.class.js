@@ -1,3 +1,6 @@
+/**
+ * Represents the world.
+ */
 class World {
   character = new Character();
   level = createLevel1();
@@ -25,6 +28,11 @@ class World {
   contactDamageIntervalMs = 500;
   enemyContactDamageTimes = new Map();
 
+  /**
+   * Creates a new World instance.
+   * @param {HTMLCanvasElement} canvas - Canvas element.
+   * @param {Keyboard} keyboard - Value for keyboard.
+   */
   constructor(canvas, keyboard) {
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
@@ -40,6 +48,9 @@ class World {
     this.run();
   }
 
+  /**
+   * Sets world.
+   */
   setWorld() {
     this.character.world = this;
     this.character.startAnimations(this.gameStateManager);
@@ -47,6 +58,9 @@ class World {
     this.startCloudAnimations();
   }
 
+  /**
+   * Starts enemy Animations.
+   */
   startEnemyAnimations() {
     this.level.enemies.forEach((enemy) => {
       if (typeof enemy.startAnimations !== "function") return;
@@ -54,6 +68,9 @@ class World {
     });
   }
 
+  /**
+   * Starts cloud Animations.
+   */
   startCloudAnimations() {
     this.level.clouds.forEach((cloud) => {
       if (typeof cloud.startAnimations !== "function") return;
@@ -61,6 +78,9 @@ class World {
     });
   }
 
+  /**
+   * Runs the update loop.
+   */
   run() {
     this.gameStateManager.registerInterval(() => {
       this.checkCollisions();
@@ -121,6 +141,9 @@ class World {
     window.audioManager?.playThrow();
   }
 
+  /**
+   * Checks collisions.
+   */
   checkCollisions() {
     this.checkEnemyCollisions();
     this.checkCoinCollisions();
@@ -128,6 +151,9 @@ class World {
     this.checkThrowableCollisions();
   }
 
+  /**
+   * Checks enemy Collisions.
+   */
   checkEnemyCollisions() {
     const collidingNow = this.getCollidingEnemies();
     this.handleNewEnemyContacts(collidingNow);
@@ -135,6 +161,10 @@ class World {
     this.releaseInactiveEnemyContacts(collidingNow);
   }
 
+  /**
+   * Returns colliding Enemies.
+   * @returns {*} Computed result value.
+   */
   getCollidingEnemies() {
     const collidingNow = new Set();
     this.level.enemies.forEach((enemy) => {
@@ -145,6 +175,10 @@ class World {
     return collidingNow;
   }
 
+  /**
+   * Handles new Enemy Contacts.
+   * @param {*} collidingNow - Value for colliding Now.
+   */
   handleNewEnemyContacts(collidingNow) {
     collidingNow.forEach((enemy) => {
       if (this.activeEnemyContacts.has(enemy)) return;
@@ -152,6 +186,10 @@ class World {
     });
   }
 
+  /**
+   * Handles active Enemy Contacts.
+   * @param {*} collidingNow - Value for colliding Now.
+   */
   handleActiveEnemyContacts(collidingNow) {
     collidingNow.forEach((enemy) => {
       if (!this.activeEnemyContacts.has(enemy)) return;
@@ -161,6 +199,10 @@ class World {
     });
   }
 
+  /**
+   * Resolve Enemy Contact.
+   * @param {*} enemy - Value for enemy.
+   */
   resolveEnemyContact(enemy) {
     if (this.character.isCollidingFromAbove(enemy)) {
       this.handleJumpOnEnemy(enemy);
@@ -172,6 +214,10 @@ class World {
     this.activeEnemyContacts.add(enemy);
   }
 
+  /**
+   * Release Inactive Enemy Contacts.
+   * @param {*} collidingNow - Value for colliding Now.
+   */
   releaseInactiveEnemyContacts(collidingNow) {
     this.activeEnemyContacts.forEach((enemy) => {
       const enemyExists = this.level.enemies.includes(enemy);
@@ -181,6 +227,9 @@ class World {
     });
   }
 
+  /**
+   * Checks coin Collisions.
+   */
   checkCoinCollisions() {
     for (let i = this.level.coins.length - 1; i >= 0; i--) {
       if (!this.character.isColliding(this.level.coins[i])) continue;
@@ -191,6 +240,9 @@ class World {
     }
   }
 
+  /**
+   * Checks bottle Collisions.
+   */
   checkBottleCollisions() {
     for (let i = this.level.bottles.length - 1; i >= 0; i--) {
       if (!this.character.isColliding(this.level.bottles[i])) continue;
@@ -224,16 +276,31 @@ class World {
     window.audioManager?.playCharacterHurt();
   }
 
+  /**
+   * Checks whether apply Side Contact Damage applies.
+   * @param {*} enemy - Value for enemy.
+   * @param {*} now - Value for now.
+   * @returns {boolean} True when the condition is met.
+   */
   shouldApplySideContactDamage(enemy, now) {
     const lastDamageTime = this.enemyContactDamageTimes.get(enemy);
     if (lastDamageTime === undefined) return true;
     return now - lastDamageTime >= this.contactDamageIntervalMs;
   }
 
+  /**
+   * Sets side Contact Damage Time.
+   * @param {*} enemy - Value for enemy.
+   * @param {*} now - Value for now.
+   */
   setSideContactDamageTime(enemy, now) {
     this.enemyContactDamageTimes.set(enemy, now);
   }
 
+  /**
+   * Apply Enemy Contact Damage.
+   * @param {*} enemy - Value for enemy.
+   */
   applyEnemyContactDamage(enemy) {
     if (!(enemy instanceof Endboss)) {
       this.character.hit();
@@ -343,12 +410,21 @@ class World {
     }
   }
 
+  /**
+   * Checks whether remove Enemy applies.
+   * @param {*} enemy - Value for enemy.
+   * @param {number} currentTime - Value for current Time.
+   * @returns {boolean} True when the condition is met.
+   */
   shouldRemoveEnemy(enemy, currentTime) {
     if (enemy instanceof Endboss) return false;
     if (!enemy.isDead() || enemy.deathTime <= 0) return false;
     return (currentTime - enemy.deathTime) / 1000 >= 3;
   }
 
+  /**
+   * Updates coin Bar.
+   */
   updateCoinBar() {
     if (this.totalCoins === 0) {
       this.coinBar.setPercentage(0);
@@ -360,6 +436,9 @@ class World {
     this.coinBar.setStock(this.collectedCoins, this.totalCoins);
   }
 
+  /**
+   * Updates bottle Bar.
+   */
   updateBottleBar() {
     if (this.maxBottles === 0) {
       this.bottleBar.setPercentage(0);
@@ -371,6 +450,9 @@ class World {
     this.bottleBar.setStock(this.collectedBottles, this.maxBottles);
   }
 
+  /**
+   * Draws the current frame.
+   */
   draw() {
     this.renderer.drawFrame();
     requestAnimationFrame(() => this.draw());

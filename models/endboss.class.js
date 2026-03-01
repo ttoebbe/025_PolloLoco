@@ -5,7 +5,7 @@ class Endboss extends MovableObject {
   height = 400;
   width = 300;
   y = 50;
-  collisionOffsets = { left: 90, right: 8, top: 20 };
+  collisionOffsets = { left: 90, right: 90, top: 20 };
   maxEnergy = 100;
   energy = 100;
   bottleHitDamage = 10;

@@ -30,6 +30,8 @@ class Endboss extends MovableObject {
   deathAnimationFinished = false;
   lastDeathFrameTime = 0;
   deathFrameDuration = 200;
+  chaseController;
+  animationController;
 
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/1_walk/G1.png",
@@ -58,13 +60,15 @@ class Endboss extends MovableObject {
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
+    this.chaseController = new EndbossChaseController(this);
+    this.animationController = new EndbossAnimationController(this);
     this.x = 2500;
   }
 
   /**
-   * Starts endboss animations using game state manager
-   * @param {GameStateManager} gameStateManager - The game state manager instance
-   * @param {Character} targetCharacter - The character to chase
+   * Starts endboss animations using game state manager.
+   * @param {GameStateManager} gameStateManager - Game state manager instance.
+   * @param {Character} targetCharacter - Character to chase.
    */
   startAnimations(gameStateManager, targetCharacter) {
     this.setTarget(targetCharacter);
@@ -73,9 +77,8 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Register Movement Loop.
-   * @param {GameStateManager} gameStateManager - Value for game State Manager.
-   * @returns {*} Computed result value.
+   * Registers movement loop.
+   * @param {GameStateManager} gameStateManager - Game state manager instance.
    */
   registerMovementLoop(gameStateManager) {
     gameStateManager.registerInterval(() => {
@@ -85,176 +88,119 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Register Animation Loop.
-   * @param {GameStateManager} gameStateManager - Value for game State Manager.
+   * Registers animation loop.
+   * @param {GameStateManager} gameStateManager - Game state manager instance.
    */
   registerAnimationLoop(gameStateManager) {
     gameStateManager.registerInterval(() => this.updateAnimationFrame(), 200);
   }
 
   /**
-   * Updates animation Frame.
-   * @returns {*} Computed result value.
-   */
-  updateAnimationFrame() {
-    if (this.isDead()) return this.playDeathFrame();
-    if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
-    if (this.isMoving) this.playAnimation(this.IMAGES_WALKING);
-  }
-
-  /**
-   * Play Death Frame.
-   */
-  playDeathFrame() {
-    this.playDeathAnimation();
-    this.stopMovement();
-  }
-
-  /**
-   * Sets target character for chase behavior
-   * @param {Character} character - Target character
+   * Sets target character for chase behavior.
+   * @param {Character} character - Target character.
    */
   setTarget(character) {
-    this.targetCharacter = character || null;
+    this.chaseController.setTarget(character);
   }
 
   /**
-   * Sets stun duration in milliseconds
-   * @param {number} durationMs - Stun duration in ms
+   * Sets stun duration in milliseconds.
+   * @param {number} durationMs - Stun duration in ms.
    */
   setStunDurationMs(durationMs) {
-    if (durationMs <= 0) return;
-    this.stunDurationMs = durationMs;
+    this.chaseController.setStunDurationMs(durationMs);
   }
 
   /**
-   * Applies or refreshes stun timer
+   * Applies or refreshes stun timer.
    */
   applyStun() {
-    this.stunnedUntil = Date.now() + this.stunDurationMs;
+    this.chaseController.applyStun();
   }
 
   /**
-   * Checks if endboss is currently stunned
-   * @returns {boolean} True when stunned
+   * Checks if endboss is currently stunned.
+   * @returns {boolean} True when stunned.
    */
   isStunned() {
-    return Date.now() < this.stunnedUntil;
+    return this.chaseController.isStunned();
   }
 
   /**
-   * Sets distance at which chase activates
-   * @param {number} distance - Activation distance in px
+   * Sets distance at which chase activates.
+   * @param {number} distance - Activation distance in px.
    */
   setChaseActivationDistance(distance) {
-    if (distance <= 0) return;
-    this.chaseActivationDistance = distance;
+    this.chaseController.setChaseActivationDistance(distance);
   }
 
   /**
-   * Returns absolute X distance to target character
-   * @returns {number} Distance in px
+   * Returns absolute X distance to target character.
+   * @returns {number} Distance in px.
    */
   getDistanceToTarget() {
-    if (!this.targetCharacter) return Number.POSITIVE_INFINITY;
-    return Math.abs(this.targetCharacter.x - this.x);
+    return this.chaseController.getDistanceToTarget();
   }
 
   /**
-   * Returns horizontal gap between endboss and target collision bounds
-   * > 0 means separated, 0 means touching, < 0 means overlap
-   * @returns {number} Horizontal gap in pixels
+   * Returns horizontal gap between collision bounds.
+   * @returns {number} Horizontal gap in pixels.
    */
   getHorizontalGapToTargetBounds() {
-    if (!this.targetCharacter) return Number.POSITIVE_INFINITY;
-    const selfBounds = this.getCollisionBounds();
-    const targetBounds = this.targetCharacter.getCollisionBounds();
-    if (selfBounds.right <= targetBounds.left) return targetBounds.left - selfBounds.right;
-    if (targetBounds.right <= selfBounds.left) return selfBounds.left - targetBounds.right;
-    const overlap = Math.min(selfBounds.right, targetBounds.right) - Math.max(selfBounds.left, targetBounds.left);
-    return -overlap;
+    return this.chaseController.getHorizontalGapToTargetBounds();
   }
 
   /**
-   * Updates horizontal chase movement towards character
+   * Updates horizontal chase movement towards character.
    */
   updateChaseMovement() {
-    if (this.shouldStopMoving()) {
-      this.stopMovement();
-      return;
-    }
-    
-    if (!this.shouldStartChase()) {
-      this.stopMovement();
-      return;
-    }
-    
-    this.executeChaseMovement();
+    this.chaseController.updateChaseMovement();
   }
 
   /**
-   * Checks if endboss should stop moving
-   * @returns {boolean} True if should stop moving
+   * Checks if endboss should stop moving.
+   * @returns {boolean} True if should stop moving.
    */
   shouldStopMoving() {
-    return !this.targetCharacter || this.isDead() || this.isStunned();
+    return this.chaseController.shouldStopMoving();
   }
 
   /**
-   * Checks if chase should start or continue
-   * @returns {boolean} True if should chase
+   * Checks if chase should start or continue.
+   * @returns {boolean} True if should chase.
    */
   shouldStartChase() {
-    let distanceToTarget = this.getDistanceToTarget();
-    
-    if (!this.chaseActivated && distanceToTarget > this.chaseActivationDistance) {
-      return false;
-    }
-    
-    if (!this.chaseActivated && distanceToTarget <= this.chaseActivationDistance) {
-      this.chaseActivated = true;
-    }
-
-    const horizontalGap = this.getHorizontalGapToTargetBounds();
-    return horizontalGap > this.chaseStopDistance;
+    return this.chaseController.shouldStartChase();
   }
 
   /**
-   * Stops endboss movement
+   * Stops endboss movement.
    */
   stopMovement() {
-    this.isMoving = false;
-    this.speed = 0;
+    this.chaseController.stopMovement();
   }
 
   /**
-   * Executes chase movement towards target
+   * Executes chase movement towards target.
    */
   executeChaseMovement() {
-    const direction = this.getChaseDirection();
-    const speedFactor = this.getCurrentSpeedFactor();
-    const chaseSpeed = this.targetCharacter.speed * speedFactor;
-    const step = this.getChaseStep(chaseSpeed);
-    if (direction === 0 || step === 0) return this.stopMovement();
-    this.speed = chaseSpeed;
-    this.isMoving = true;
-    this.moveInDirection(direction, step);
+    this.chaseController.executeChaseMovement();
   }
 
   /**
-   * Checks whether endboss is in enraged movement phase.
-   * @returns {boolean} True when health threshold is reached.
+   * Checks whether endboss is enraged.
+   * @returns {boolean} True when enraged.
    */
   isEnraged() {
-    return this.energy <= this.enrageThresholdEnergy && !this.isDead();
+    return this.chaseController.isEnraged();
   }
 
   /**
-   * Returns current chase speed factor based on phase.
+   * Returns current chase speed factor.
    * @returns {number} Movement speed factor.
    */
   getCurrentSpeedFactor() {
-    return this.isEnraged() ? this.enragedSpeedFactor : this.baseSpeedFactor;
+    return this.chaseController.getCurrentSpeedFactor();
   }
 
   /**
@@ -263,8 +209,7 @@ class Endboss extends MovableObject {
    * @returns {boolean} True when damage window is open.
    */
   isBottleDamageWindowOpen(now) {
-    if (!this.chaseActivated) return false;
-    return now - this.lastBottleDamageTime >= this.bottleDamageCooldownMs;
+    return this.chaseController.isBottleDamageWindowOpen(now);
   }
 
   /**
@@ -273,137 +218,118 @@ class Endboss extends MovableObject {
    * @returns {boolean} True when stun cooldown elapsed.
    */
   canApplyBottleStun(now) {
-    return now - this.lastBottleStunTime >= this.stunCooldownMs;
+    return this.chaseController.canApplyBottleStun(now);
   }
 
   /**
-   * Applies a bottle hit using damage and stun windows.
+   * Applies bottle hit using damage and stun windows.
    * @returns {boolean} True if damage was applied.
    */
   tryTakeBottleHit() {
-    const now = Date.now();
-    if (this.isDead() || !this.isBottleDamageWindowOpen(now)) return false;
-    this.lastBottleDamageTime = now;
-    this.hit();
-    if (!this.isDead() && this.canApplyBottleStun(now)) {
-      this.lastBottleStunTime = now;
-      this.applyStun();
-    }
-    return true;
+    return this.chaseController.tryTakeBottleHit();
   }
 
   /**
-   * Returns chase Direction.
-   * @returns {*} Computed result value.
+   * Returns chase direction.
+   * @returns {number} Direction as -1, 0 or 1.
    */
   getChaseDirection() {
-    const selfBounds = this.getCollisionBounds();
-    const targetBounds = this.targetCharacter.getCollisionBounds();
-    const selfCenterX = (selfBounds.left + selfBounds.right) / 2;
-    const targetCenterX = (targetBounds.left + targetBounds.right) / 2;
-    return Math.sign(targetCenterX - selfCenterX);
+    return this.chaseController.getChaseDirection();
   }
 
   /**
-   * Returns chase Step.
-   * @param {*} chaseSpeed - Value for chase Speed.
-   * @returns {*} Computed result value.
+   * Returns chase step.
+   * @param {number} chaseSpeed - Computed chase speed.
+   * @returns {number} Pixel step for this frame.
    */
   getChaseStep(chaseSpeed) {
-    const horizontalGap = this.getHorizontalGapToTargetBounds();
-    const remainingDistance = Math.max(0, horizontalGap - this.chaseStopDistance);
-    return Math.min(chaseSpeed, remainingDistance);
+    return this.chaseController.getChaseStep(chaseSpeed);
   }
 
   /**
-   * Move In Direction.
-   * @param {*} direction - Value for direction.
-   * @param {*} step - Value for step.
-   * @returns {*} Computed result value.
+   * Moves endboss in one horizontal direction.
+   * @param {number} direction - Direction as -1 or 1.
+   * @param {number} step - Pixel step.
    */
   moveInDirection(direction, step) {
-    if (direction < 0) return this.moveLeftStep(step);
-    this.moveRightStep(step);
+    this.chaseController.moveInDirection(direction, step);
   }
 
   /**
-   * Move Left Step.
-   * @param {*} step - Value for step.
+   * Moves endboss one step left.
+   * @param {number} step - Pixel step.
    */
   moveLeftStep(step) {
-    this.x -= step;
-    this.otherDirection = false;
+    this.chaseController.moveLeftStep(step);
   }
 
   /**
-   * Move Right Step.
-   * @param {*} step - Value for step.
+   * Moves endboss one step right.
+   * @param {number} step - Pixel step.
    */
   moveRightStep(step) {
-    this.x += step;
-    this.otherDirection = true;
+    this.chaseController.moveRightStep(step);
   }
 
   /**
-   * Plays death animation until last frame and keeps it there
+   * Updates animation frame based on state.
+   */
+  updateAnimationFrame() {
+    this.animationController.updateAnimationFrame();
+  }
+
+  /**
+   * Plays one death animation frame.
+   */
+  playDeathFrame() {
+    this.animationController.playDeathFrame();
+  }
+
+  /**
+   * Plays death animation until last frame.
    */
   playDeathAnimation() {
-    const now = Date.now();
-    if (!this.isDying) return this.startDeathAnimation(now);
-    if (this.deathAnimationFinished) return this.setDeathFrame(this.IMAGES_DEAD.length - 1);
-    if (!this.isNextDeathFrameReady(now)) return;
-    this.advanceDeathAnimation(now);
+    this.animationController.playDeathAnimation();
   }
 
   /**
-   * Starts death Animation.
-   * @param {*} now - Value for now.
+   * Starts death animation.
+   * @param {number} now - Current timestamp.
    */
   startDeathAnimation(now) {
-    this.isDying = true;
-    this.deathAnimationIndex = 0;
-    this.deathAnimationFinished = false;
-    this.lastDeathFrameTime = now;
-    this.setDeathFrame();
+    this.animationController.startDeathAnimation(now);
   }
 
   /**
-   * Checks whether next Death Frame Ready is true.
-   * @param {*} now - Value for now.
-   * @returns {boolean} True when the condition is met.
+   * Checks if next death frame is ready.
+   * @param {number} now - Current timestamp.
+   * @returns {boolean} True when next frame should render.
    */
   isNextDeathFrameReady(now) {
-    return now - this.lastDeathFrameTime >= this.deathFrameDuration;
+    return this.animationController.isNextDeathFrameReady(now);
   }
 
   /**
-   * Advance Death Animation.
-   * @param {*} now - Value for now.
-   * @returns {*} Computed result value.
+   * Advances death animation by one frame.
+   * @param {number} now - Current timestamp.
    */
   advanceDeathAnimation(now) {
-    this.lastDeathFrameTime = now;
-    this.deathAnimationIndex++;
-    if (this.deathAnimationIndex >= this.IMAGES_DEAD.length - 1) return this.finishDeathAnimation();
-    this.setDeathFrame();
+    this.animationController.advanceDeathAnimation(now);
   }
 
   /**
-   * Finish Death Animation.
+   * Completes death animation.
    */
   finishDeathAnimation() {
-    this.deathAnimationIndex = this.IMAGES_DEAD.length - 1;
-    this.deathAnimationFinished = true;
-    this.setDeathFrame();
+    this.animationController.finishDeathAnimation();
   }
 
   /**
-   * Sets death Frame.
-   * @param {number} index - Value for index.
+   * Sets one death frame image.
+   * @param {number} index - Target frame index.
    */
   setDeathFrame(index = this.deathAnimationIndex) {
-    let path = this.IMAGES_DEAD[index];
-    this.img = this.imageCache[path];
+    this.animationController.setDeathFrame(index);
   }
 
   /**
@@ -413,17 +339,14 @@ class Endboss extends MovableObject {
     if (this.isDead()) return;
     this.energy -= this.bottleHitDamage;
     this.lastHit = Date.now();
-    if (this.energy <= 0) {
-      this.energy = 0;
-      this.setDeathTimestamp();
-      this.playDeadSound();
-      return;
-    }
-    this.playHurtSound();
+    if (this.energy > 0) return this.playHurtSound();
+    this.energy = 0;
+    this.setDeathTimestamp();
+    this.playDeadSound();
   }
 
   /**
-   * Sets death timestamp once
+   * Sets death timestamp once.
    */
   setDeathTimestamp() {
     if (this.deathTime !== 0) return;
@@ -431,7 +354,7 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Plays endboss hurt sound
+   * Plays endboss hurt sound.
    */
   playHurtSound() {
     if (!window.audioManager) return;
@@ -439,7 +362,7 @@ class Endboss extends MovableObject {
   }
 
   /**
-   * Plays endboss death sound
+   * Plays endboss death sound.
    */
   playDeadSound() {
     if (!window.audioManager) return;

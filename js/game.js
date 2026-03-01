@@ -271,23 +271,35 @@ function resetKeyboardState() {
   keyboard.d = false;
 }
 
+/**
+ * Listens for game start event.
+ */
 document.addEventListener("gameStart", () => {
   startGame();
   setPauseUi(false);
   window.audioManager?.startBackgroundMusic();
 });
 
+/**
+ * Listens for game restart event.
+ */
 document.addEventListener("gameRestart", () => {
   window.audioManager?.hardStopAll();
   setPauseUi(false);
   window.audioManager?.startBackgroundMusic();
 });
 
+/**
+ * Listens for game ended event.
+ */
 document.addEventListener("gameEnded", () => {
   setGameUiState("ended");
   window.audioManager?.hardStopAll();
 });
 
+/**
+ * Listens for game back to menu event.
+ */
 document.addEventListener("gameBackToMenu", () => {
   setGameUiState("start");
   resetKeyboardState();
@@ -295,6 +307,12 @@ document.addEventListener("gameBackToMenu", () => {
   screenManager.showStartScreen();
 });
 
+/**
+ * Listens for key down event.
+ */
 window.addEventListener("keydown", handleKeyDown);
 
+/**
+ * Listens for key up event.
+ */
 window.addEventListener("keyup", handleKeyUp);
